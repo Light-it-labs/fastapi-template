@@ -1,0 +1,35 @@
+name: Code Quality Checks
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Set up Poetry
+      uses: Gr1N/setup-poetry@v9
+      with:
+        poetry-version: "1.7.1"
+
+    - name: Run Flake8
+      uses: py-actions/flake8@v2
+
+    - name: Run Black
+      uses: psf/black@stable
+      with:
+        options: "--check --verbose"
+
+    - name: Poetry install
+      run: poetry install --no-interaction
