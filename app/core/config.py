@@ -1,3 +1,4 @@
+import logging
 import secrets
 from functools import lru_cache
 from typing import List, Optional, Union
@@ -19,6 +20,7 @@ class Settings(BaseSettings):
     SERVER_HOST: AnyHttpUrl
     BACKEND_CORS_ORIGINS: Union[str, List[str]] = []
     PROJECT_NAME: str
+    API_RATE_LIMIT: int = 60
 
     # Database
     POSTGRES_SERVER: str
@@ -27,6 +29,10 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_PORT: int
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
+
+    # Logging
+    LOG_JSON_FORMAT: bool = False
+    LOG_LEVEL: int = logging.INFO
 
     # Auth
     ALGORITHM: str = "HS256"
