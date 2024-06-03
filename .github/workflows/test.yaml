@@ -2,11 +2,13 @@ name: Pytest
 
 on:
   pull_request:
+    types: [labeled]
     branches:
       - '*'
 
 jobs:
   test:
+    if: "contains(github.event.pull_request.labels.*.name, 'run-tests')"
     name: Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
