@@ -1,12 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 
 from app.api.dependencies.get_db import SessionDependency
 from app.core.config import get_settings
 from app.core.security import create_access_token
+from app.exceptions.invalid_credentials_exception import InvalidCredentialsException
+from app.exceptions.model_not_found_exception import ModelNotFoundException
 from app.repositories.users_repository import users_repository
 from app.schemas.auth_schema import UserLogin
 from app.schemas.token_schema import Token, TokenPayload
 from app.services.auth_service import AuthService
+from app.use_cases.auth_user_use_case import AuthUserUseCase
 
 router = APIRouter()
 settings = get_settings()
@@ -14,9 +17,7 @@ settings = get_settings()
 
 @router.post("/login")
 def login_access_token(session: SessionDependency, login_data: UserLogin) -> Token:
-    user = AuthService(session, users_repository).authenticate(
-        email=login_data.email, password=login_data.password
-    )
-    if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    return Token(access_token=create_access_token(TokenPayload(user_id=str(user.id))))
+    try:
+        return AuthUserUseCase(session).execute(login_data)
+    except (ModelNotFoundException, InvalidCredentialsException):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")

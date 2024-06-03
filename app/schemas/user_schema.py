@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     email: Optional[EmailStr] = None
 
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
     email: EmailStr
     hashed_password: str
 
