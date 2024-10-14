@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class UserBase(BaseModel):
-    email: Optional[EmailStr] = None
+    email: EmailStr | None = None
 
 
 class UserCreate(BaseModel):
@@ -14,12 +14,12 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(UserBase):
-    hashed_password: Optional[str] = None
+    hashed_password: str | None = None
 
 
 class UserInDBBase(UserBase):
     model_config = ConfigDict(from_attributes=True)
-    id: Optional[UUID] = None
+    id: UUID | None = None
 
 
 class UserResponse(UserInDBBase):

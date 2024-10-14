@@ -33,7 +33,7 @@ class TestLogin:
             },
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 401
 
     def test_login_non_existent_email(self, client: TestClient, session: Session):
         create_user(session)
@@ -46,4 +46,4 @@ class TestLogin:
             },
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 401
