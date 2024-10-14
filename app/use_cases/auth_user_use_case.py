@@ -8,7 +8,6 @@ from app.services.auth_service import AuthService
 
 
 class AuthUserUseCase:
-
     def __init__(self, session: Session):
         self.session = session
 
@@ -16,4 +15,8 @@ class AuthUserUseCase:
         user = AuthService(self.session, users_repository).authenticate(
             email=login_data.email, password=login_data.password
         )
-        return Token(access_token=create_access_token(TokenPayload(user_id=str(user.id))))
+        return Token(
+            access_token=create_access_token(
+                TokenPayload(user_id=str(user.id))
+            )
+        )

@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.get("")
-def check_database_health():
+def check_database_health() -> dict:
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))

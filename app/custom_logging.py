@@ -68,7 +68,9 @@ def setup_logging(json_logs: bool = False, log_level: str = "INFO") -> None:
     handler.setFormatter(formatter)
     root_logger = logging.getLogger()
     root_logger.addHandler(handler)
-    root_logger.setLevel(log_level.upper() if isinstance(log_level, str) else log_level)
+    root_logger.setLevel(
+        log_level.upper() if isinstance(log_level, str) else log_level
+    )
 
     for _log in ["uvicorn", "uvicorn.error"]:
         # Clear the log handlers for uvicorn loggers, and enable propagation

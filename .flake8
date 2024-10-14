@@ -1,4 +1,4 @@
 [flake8]
-exclude = .git,__pycache__,docs/source/conf.py,old,build,dist
-max-line-length = 89
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,*/__init__.py
+max-line-length = 105
 max-complexity = 10
