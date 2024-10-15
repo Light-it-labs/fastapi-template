@@ -8,7 +8,9 @@ from pydantic import ValidationError
 
 from app.api.dependencies.get_token import TokenDep
 from app.core.config import settings
-from app.exceptions.invalid_credentials_exception import InvalidCredentialsException
+from app.exceptions.invalid_credentials_exception import (
+    InvalidCredentialsException,
+)
 from app.schemas.token_schema import TokenPayload
 
 
@@ -45,7 +47,9 @@ def validate_token(token: TokenDep):
     if not token:
         raise InvalidCredentialsException()
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.ALGORITHM)
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=settings.ALGORITHM
+        )
         token_data = TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise InvalidCredentialsException()

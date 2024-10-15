@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 
 from app.core.security import verify_password
-from app.exceptions.invalid_credentials_exception import InvalidCredentialsException
+from app.exceptions.invalid_credentials_exception import (
+    InvalidCredentialsException,
+)
 from app.exceptions.model_not_found_exception import ModelNotFoundException
 from app.repositories.users_repository import UsersRepository
 from app.schemas.user_schema import UserInDBBase

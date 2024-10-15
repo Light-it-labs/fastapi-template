@@ -1,6 +1,19 @@
-#!/bin/sh -e
+#!/bin/sh
+set -e
 set -x
 
-autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place . --exclude=__init__.py
-isort --recursive --apply app
-black .
+# Detect if we're running in Git Bash on Windows
+case "$(uname -s)" in
+    MINGW*|CYGWIN*) 
+        # We're in Git Bash on Windows
+        export MSYS_NO_PATHCONV=1
+        ;;
+    *)
+        # We're in a Unix-like environment
+        ;;
+esac
+
+# Run formatting commands
+ruff check --fix
+ruff format
+mypy .

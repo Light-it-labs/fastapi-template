@@ -30,7 +30,9 @@ access_logger = structlog.stdlib.get_logger("api.access")
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=[
+            str(origin) for origin in settings.BACKEND_CORS_ORIGINS
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -50,7 +52,9 @@ async def logging_middleware(request: Request, call_next) -> Response:
     try:
         response = await call_next(request)
     except Exception:
-        structlog.stdlib.get_logger("api.error").exception("Uncaught exception")
+        structlog.stdlib.get_logger("api.error").exception(
+            "Uncaught exception"
+        )
         raise
     finally:
         parsed_url = urlparse(str(request.url))
@@ -97,7 +101,9 @@ def filter_transactions(event, hint):
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+):
     modified_details = []
     details = exc.errors()
     for error in details:

@@ -22,7 +22,9 @@ class TestLogin:
         assert response.status_code == 200
         assert "access_token" in response.json()
 
-    def test_login_incorrect_password(self, client: TestClient, session: Session):
+    def test_login_incorrect_password(
+        self, client: TestClient, session: Session
+    ):
         created_user = create_user(session)
 
         response = client.post(
@@ -33,9 +35,11 @@ class TestLogin:
             },
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 401
 
-    def test_login_non_existent_email(self, client: TestClient, session: Session):
+    def test_login_non_existent_email(
+        self, client: TestClient, session: Session
+    ):
         create_user(session)
 
         response = client.post(
@@ -46,4 +50,4 @@ class TestLogin:
             },
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 401
