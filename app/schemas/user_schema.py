@@ -23,3 +23,9 @@ class UserInDBBase(UserBase):
 
 class UserResponse(UserInDBBase):
     pass
+
+
+class UserAuth(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    hashed_password: str
