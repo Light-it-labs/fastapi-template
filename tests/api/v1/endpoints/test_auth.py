@@ -11,13 +11,15 @@ class TestLogin:
     def test_login(self, client: TestClient, session: Session):
         created_user = create_user(session)
 
-        client.post(
+        response = client.post(
             login_path,
             json={
                 "email": created_user.email,
                 "password": "password",
             },
         )
+
+        assert response.status_code == 204
 
     def test_login_incorrect_password(
         self, client: TestClient, session: Session
