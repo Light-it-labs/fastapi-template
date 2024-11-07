@@ -69,6 +69,7 @@ services:
       - ./:/code/
 
   rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:latest
     ports:
       - 5672:5672

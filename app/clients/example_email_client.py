@@ -1,7 +1,10 @@
+import logging
 from typing import List
 
 from app.clients.base_email_client import BaseEmailClient
-from app.celery.tasks.emails import send_welcome_email
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class ExampleEmailClient(BaseEmailClient):
@@ -15,4 +18,4 @@ class ExampleEmailClient(BaseEmailClient):
         set_configuration_name: bool = False,
     ) -> None:
         for email in to_emails:
-            send_welcome_email.delay(email)  # type: ignore
+            logger.info(f"Sending email to {email}")

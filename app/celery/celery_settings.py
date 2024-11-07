@@ -17,7 +17,7 @@ def get_celery_settings() -> dict:
         "beat_schedule": {
             "send_reminder_email": {
                 "task": "app.celery.tasks.emails.send_reminder_email",
-                "schedule": crontab(minute="*/5"),
+                "schedule": crontab(minute="*/30"),
             },
         },
     }
