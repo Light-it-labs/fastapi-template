@@ -6,7 +6,7 @@ from app.exceptions.invalid_credentials_exception import (
 )
 from app.exceptions.model_not_found_exception import ModelNotFoundException
 from app.repositories.users_repository import UsersRepository
-from app.schemas.user_schema import UserInDBBase
+from app.schemas.user_schema import UserInDB
 
 
 class AuthService:
@@ -14,10 +14,10 @@ class AuthService:
         self.session = session
         self.repository = repository
 
-    def authenticate(self, email: str, password: str) -> UserInDBBase:
+    def authenticate(self, email: str, password: str) -> UserInDB:
         user = self.repository.get_by_email(self.session, email=email)
         if not user:
             raise ModelNotFoundException()
         if not verify_password(password, str(user.hashed_password)):
             raise InvalidCredentialsException()
-        return UserInDBBase.model_validate(user)
+        return UserInDB.model_validate(user)
