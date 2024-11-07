@@ -45,7 +45,7 @@ services:
     entrypoint:
       - app/celery/start-celery-worker.sh
     depends_on:
-      - db
+      - rabbitmq
     env_file:
       - .env
     ports:
@@ -60,7 +60,7 @@ services:
     entrypoint:
       - app/celery/start-celery-beat.sh
     depends_on:
-      - db
+      - rabbitmq
     env_file:
       - .env
     ports:
@@ -68,19 +68,21 @@ services:
     volumes:
       - ./:/code/
 
-  # rabbitmq:
-  #   image: rabbitmq:latest
-  #   ports:
-  #     - 5672:5672
-  #     - 15672:15672
-  #   environment:
-  #     RABBITMQ_DEFAULT_USER: "root"
-  #     RABBITMQ_DEFAULT_PASS: "8DXFFGVSS"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 3
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: "root"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq-password"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
 volumes:
   app-db-data:

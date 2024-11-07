@@ -23,3 +23,8 @@ class UserInDBBase(UserBase):
 
 class UserResponse(UserInDBBase):
     pass
+
+
+class CreateUserRequest(BaseModel):
+    email: EmailStr
+    password: str

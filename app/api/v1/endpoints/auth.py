@@ -8,7 +8,7 @@ from app.exceptions.invalid_credentials_exception import (
 from app.exceptions.model_not_found_exception import ModelNotFoundException
 from app.schemas.auth_schema import UserLogin
 from app.schemas.token_schema import Token
-from app.use_cases.auth_user_use_case import AuthUserUseCase
+from app.use_cases.users.auth_user_use_case import AuthUserUseCase
 
 router = APIRouter()
 settings = get_settings()
