@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     SERVER_HOST: AnyHttpUrl
     BACKEND_CORS_ORIGINS: Union[str, List[str]] = []
     PROJECT_NAME: str
-    API_RATE_LIMIT: int = 60
+    AUTHENTICATION_API_RATE_LIMIT: str = "5 per minute"
+    SECURE_COOKIE: bool = True
 
     # Database
     POSTGRES_SERVER: str
