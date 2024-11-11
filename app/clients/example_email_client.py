@@ -17,5 +17,4 @@ class ExampleEmailClient(BaseEmailClient):
         html_message: str,
         set_configuration_name: bool = False,
     ) -> None:
-        for email in to_emails:
-            logger.info(f"Sending email to {email}")
+        logger.info("Sending email.")

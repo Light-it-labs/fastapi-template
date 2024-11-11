@@ -4,6 +4,7 @@ from string import Template
 
 from app.clients.base_email_client import BaseEmailClient
 from app.core.config import settings
+from app.schemas.user_schema import UserInDB
 
 
 class Paths(Enum):
@@ -46,28 +47,28 @@ class EmailService:
 
     def send_new_user_email(
         self,
-        user: dict,
+        user: UserInDB,
     ) -> None:
         return self.email_client.send_email(
-            to_emails=[user["email"]],
+            to_emails=[user.email],
             html_message=self._get_email_body(
                 Paths.NEW_USER.value,
                 "Welcome",
                 {},
-                user["email"],
+                user.email,
             ),
         )
 
     def send_user_remind_email(
         self,
-        user: dict,
+        user: UserInDB,
     ) -> None:
         return self.email_client.send_email(
-            to_emails=[user["email"]],
+            to_emails=[user.email],
             html_message=self._get_email_body(
                 Paths.NEW_USER.value,
                 "Welcome",
                 {},
-                user["email"],
+                user.email,
             ),
         )

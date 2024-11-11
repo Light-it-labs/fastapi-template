@@ -14,8 +14,7 @@ router = APIRouter()
 def get_current_user(
     current_user: CurrentUser,
 ) -> UserResponse:
-    user = UserResponse.model_validate(current_user)
-    return user
+    return UserResponse.model_validate(current_user)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
