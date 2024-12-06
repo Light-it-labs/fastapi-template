@@ -30,7 +30,7 @@ class CreateUserUseCase:
             )
         )
 
-        send_welcome_email.delay(created_user.model_dump())  # type: ignore
+        send_welcome_email.delay(created_user.id)  # type: ignore
 
         return UserResponse(
             id=created_user.id,

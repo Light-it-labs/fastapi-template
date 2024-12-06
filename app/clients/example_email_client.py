@@ -17,4 +17,5 @@ class ExampleEmailClient(BaseEmailClient):
         html_message: str,
         set_configuration_name: bool = False,
     ) -> None:
+        # If fails, should raise an ExternalProviderException
         logger.info("Sending email.")
