@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
 
+    # RabbitMQ
+    RABBITMQ_HOST: str = "rabbitmq"
+    RABBITMQ_PORT: int = 5672
+    RABBITMQ_USER: str = "root"
+    RABBITMQ_PASSWORD: str = "rabbitmq-password"
+
     # Logging
     LOG_JSON_FORMAT: bool = False
     LOG_LEVEL: int = logging.INFO
@@ -38,6 +44,11 @@ class Settings(BaseSettings):
     # Auth
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
+    # Mail
+    SENDER_EMAIL: str = "test@test.com"
+    SEND_WELCOME_EMAIL_MAX_RETRIES: int = 5
+    SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: int = 5
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -63,6 +74,11 @@ class Settings(BaseSettings):
             path=info.data.get("POSTGRES_DB") or "",
             port=info.data.get("POSTGRES_PORT"),
         ).unicode_string()
+
+    @property
+    def rabbitmq_url(self) -> str:
+        """Construct the RabbitMQ URL for the broker."""
+        return f"amqp://{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD}@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}//"
 
 
 settings = Settings()
