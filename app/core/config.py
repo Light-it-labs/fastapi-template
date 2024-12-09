@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     # Mail
     SENDER_EMAIL: str = "test@test.com"
     SEND_WELCOME_EMAIL_MAX_RETRIES: int = 5
+    SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: int = 5
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

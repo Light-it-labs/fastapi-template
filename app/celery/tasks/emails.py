@@ -1,7 +1,7 @@
 from uuid import UUID
 from app.clients.example_email_client import ExampleEmailClient
 from app.db.session import SessionLocal
-from app.exceptions.external_provider_error import ExternalProviderException
+from app.exceptions.email_client_exception import EmailClientException
 from app.main import celery
 from app.schemas.pagination_schema import ListFilter
 from app.schemas.user_schema import UserInDB
@@ -31,8 +31,8 @@ def send_reminder_email() -> None:
 
 
 @celery.task(
-    autoretry_for=(ExternalProviderException,),
-    retry_backoff=True,
+    autoretry_for=(EmailClientException,),
+    retry_backoff=settings.SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE,
     max_retries=settings.SEND_WELCOME_EMAIL_MAX_RETRIES,
     retry_jitter=False,
 )

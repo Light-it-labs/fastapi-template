@@ -17,7 +17,7 @@ class CreateUserUseCase:
         users_service = UsersService(self.session, users_repository)
         if users_service.get_by_email(create_user_request.email):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_409_CONFLICT,
                 detail="User with that email already registered.",
             )
 
