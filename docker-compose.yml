@@ -38,5 +38,52 @@ services:
     volumes:
       - ./:/code/
 
+  celery_worker:
+    container_name: celery-worker
+    build:
+      context: .
+    entrypoint:
+      - app/celery/start-celery-worker.sh
+    depends_on:
+      - rabbitmq
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./:/code/
+
+  celery_beat:
+    container_name: celery-beat
+    build:
+      context: .
+    entrypoint:
+      - app/celery/start-celery-beat.sh
+    depends_on:
+      - rabbitmq
+    env_file:
+      - .env
+    ports:
+      - "6479:6479"
+    volumes:
+      - ./:/code/
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:latest
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: "root"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq-password"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
 volumes:
   app-db-data:

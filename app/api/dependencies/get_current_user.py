@@ -10,13 +10,11 @@ from app.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
 )
 from app.repositories.users_repository import users_repository
-from app.schemas.user_schema import UserInDBBase
+from app.schemas.user_schema import UserInDB
 from app.services.users_service import UsersService
 
 
-def get_current_user(
-    session: SessionDependency, token: TokenDep
-) -> UserInDBBase:
+def get_current_user(session: SessionDependency, token: TokenDep) -> UserInDB:
     try:
         token_data = validate_token(token)
     except InvalidCredentialsException as e:
@@ -31,4 +29,4 @@ def get_current_user(
     return provider
 
 
-CurrentUser = Annotated[UserInDBBase, Depends(get_current_user)]
+CurrentUser = Annotated[UserInDB, Depends(get_current_user)]

@@ -7,7 +7,7 @@ from app.exceptions.invalid_credentials_exception import (
 )
 from app.exceptions.model_not_found_exception import ModelNotFoundException
 from app.schemas.auth_schema import UserLogin
-from app.use_cases.auth_user_use_case import AuthUserUseCase
+from app.use_cases.users.auth_user_use_case import AuthUserUseCase
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
