@@ -13,7 +13,6 @@ pydantic = {extras = ["email"], version = "^2.7.1"}
 uvicorn = "^0.27.1"
 pydantic-settings = "^2.1.0"
 tenacity = "^8.3.0"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 pytz = "^2024.1"
 python-multipart = "^0.0.9"
@@ -23,6 +22,7 @@ asgi-correlation-id = "^4.3.1"
 structlog-sentry = "^2.1.0"
 slowapi = "^0.1.9"
 celery = "^5.4.0"
+pyjwt = "^2.10.1"
 
 
 [tool.poetry.group.dev.dependencies]

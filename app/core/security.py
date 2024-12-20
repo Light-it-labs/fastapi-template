@@ -3,7 +3,8 @@ from typing import Any
 
 import bcrypt
 import pytz
-from jose import jwt
+from jwt import encode, decode
+from jwt.exceptions import PyJWTError
 from pydantic import ValidationError
 
 from app.api.dependencies.get_token import TokenDep
@@ -25,32 +26,28 @@ def create_access_token(
         )
     to_encode = {"exp": expire}
     to_encode.update(token_data.model_dump())
-    encoded_jwt = jwt.encode(
+    encoded_jwt = encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
     return encoded_jwt
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    print(plain_password.encode())
-    print(hashed_password.encode())
     return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
 
 
 def get_password_hash(password: str) -> str:
-    print("HASH")
-    print(bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode())
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
-def validate_token(token: TokenDep):
+def validate_token(token: TokenDep) -> TokenPayload:
     if not token:
         raise InvalidCredentialsException()
     try:
-        payload = jwt.decode(
+        payload = decode(
             token, settings.SECRET_KEY, algorithms=settings.ALGORITHM
         )
         token_data = TokenPayload(**payload)
-    except (jwt.JWTError, ValidationError):
+    except (PyJWTError, ValidationError):
         raise InvalidCredentialsException()
     return token_data
