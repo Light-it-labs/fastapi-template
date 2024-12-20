@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import status
 
 from app.api.dependencies.get_current_user import UsersService
+from app.core import security
 from app.repositories.users_repository import users_repository
 from app.schemas.user_schema import CreateUserRequest, UserCreate, UserResponse
 
@@ -26,7 +27,9 @@ class CreateUserUseCase:
         ).create_user(
             UserCreate(
                 email=create_user_request.email,
-                hashed_password=create_user_request.password,
+                hashed_password=security.get_password_hash(
+                    create_user_request.password
+                ),
             )
         )
 
