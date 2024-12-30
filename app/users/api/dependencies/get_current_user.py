@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from starlette import status
@@ -23,7 +24,7 @@ def get_current_user(session: SessionDependency, token: TokenDep) -> UserInDB:
             status_code=status.HTTP_403_FORBIDDEN, detail=e.message
         )
     provider = UsersService(session, users_repository).get_by_id(
-        token_data.user_id
+        UUID(token_data.user_id)
     )
     if not provider:
         raise HTTPException(status_code=404, detail="Provider not found")

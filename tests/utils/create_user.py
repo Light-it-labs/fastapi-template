@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 
 from app.auth.utils import security
-from app.repositories.users_repository import users_repository
-from app.schemas.user_schema import UserCreate, UserInDB
-from app.services.users_service import UsersService
+from app.users.repositories.users_repository import users_repository
+from app.users.schemas.user_schema import UserCreate, UserInDB
+from app.users.services.users_service import UsersService
 
 
 def create_user(
