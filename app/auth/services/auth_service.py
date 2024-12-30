@@ -1,14 +1,15 @@
 from sqlalchemy.orm import Session
 
 from app.auth.schemas.auth_schema import UserLogin
-from app.common.exceptions.model_not_found_exception import ModelNotFoundException
-from app.core.security import verify_password
+from app.common.exceptions.model_not_found_exception import (
+    ModelNotFoundException,
+)
+from app.auth.utils.security import verify_password
 from app.auth.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
 )
 from app.users.repositories.users_repository import UsersRepository
 from app.users.schemas.user_schema import UserAuth
-
 
 
 class AuthService:

@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel
 
 
@@ -7,4 +8,4 @@ class Token(BaseModel):
 
 # Contents of JWT token
 class TokenPayload(BaseModel):
-    user_id: str | None = None
+    user_id: UUID

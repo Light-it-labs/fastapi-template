@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.core import security
+from app.auth.utils import security
 from app.repositories.users_repository import users_repository
 from app.schemas.user_schema import UserCreate, UserInDB
 from app.services.users_service import UsersService

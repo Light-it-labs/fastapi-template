@@ -50,11 +50,11 @@ exclude = [
     "app.factories.*",
     "app.commands.*",
     "app.core.*",
-    "app.schemas.pagination_schema.py",
+    "app.common.schemas.pagination_schema.py",
     "app.main.py",
     "alembic.env.py",
     "app.custom_logging.py",
-    "app.models.base_class.py"
+    "app.common.models.base_class.py"
 ]
 
 

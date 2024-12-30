@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import Response
 
 from app.auth.schemas.token_schema import TokenPayload
-from app.core import security
+from app.auth.utils import security
 from app.core.config import get_settings
 
 

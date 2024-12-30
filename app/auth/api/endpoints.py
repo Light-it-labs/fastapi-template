@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, status, Response, Request
 
-from app.api.dependencies.get_db import SessionDependency
+from app.common.api.dependencies.get_db import SessionDependency
 from app.auth.schemas.auth_schema import UserLogin
 from app.auth.use_cases.auth_user_use_case import AuthUserUseCase
-from app.common.exceptions.model_not_found_exception import ModelNotFoundException
+from app.common.exceptions.model_not_found_exception import (
+    ModelNotFoundException,
+)
 from app.core.config import get_settings
 from app.auth.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
