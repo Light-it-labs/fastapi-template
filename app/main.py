@@ -12,7 +12,9 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from uvicorn.protocols.utils import get_path_with_query_string
 
-from app.api.routers import api_router
+from app.users.api.routers import api_router as users_router
+from app.auth.api.routers import api_router as auth_router
+from app.common.api.routers import api_router as common_router
 from app.celery.celery_settings import get_celery_settings
 from app.core.config import get_settings
 from app.custom_logging import setup_logging
@@ -46,7 +48,9 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
-app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(users_router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(common_router, prefix=settings.API_V1_STR)
 
 
 @app.middleware("http")

@@ -5,8 +5,8 @@ from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 
 from app.core.config import get_settings
-from app.models.base_class import Base
-from app.models import *  # noqa
+from app.common.models.base_class import Base
+from app.users.models import *  # noqa
 
 
 # this is the Alembic Config object, which provides
