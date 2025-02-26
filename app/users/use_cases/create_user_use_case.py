@@ -26,9 +26,7 @@ class CreateUserUseCase:
                 detail="User with that email already registered.",
             )
 
-        created_user = UsersService(
-            self.session, users_repository
-        ).create_user(
+        created_user = users_service.create_user(
             UserCreate(
                 email=create_user_request.email,
                 hashed_password=security.get_password_hash(

@@ -24,11 +24,11 @@ jobs:
           poetry-version: "1.8.0"
 
       - name: Run Ruff - Format Check
-        uses: chartboost/ruff-action@v1
+        uses: astral-sh/ruff-action@v3
         with:
           args: "format --check"
 
       - name: Run Ruff - Lint Check
-        uses: chartboost/ruff-action@v1
+        uses: astral-sh/ruff-action@v3
         with:
           args: "check"

@@ -18,5 +18,5 @@ def check_database_health() -> dict:
         error_message = str(e)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Database is " f"unhealthy: {error_message}",
+            detail=f"Database is unhealthy: {error_message}",
         )
