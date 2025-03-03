@@ -5,7 +5,7 @@ ARG ENV
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8 \
     BASE_DIR=/code \
-    POETRY_VERSION=1.7.1
+    POETRY_VERSION=2.1
 
 RUN pip install psycopg2-binary
 
@@ -18,8 +18,10 @@ RUN pip install --upgrade pip \
 COPY poetry.lock pyproject.toml $BASE_DIR
 
 # Project initialization:
+WORKDIR $BASE_DIR
 RUN poetry config virtualenvs.create false \
   && poetry install --no-root
+  
 
 COPY . $BASE_DIR
 
