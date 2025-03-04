@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import RootTransaction, event
 from fastapi.testclient import TestClient
 
-from app.common.api.dependencies.get_db import get_db
+from app.common.api.dependencies.get_session import get_session
 from app.core.config import get_settings
 from app.db.session import engine, SessionLocal
 from app.main import app
@@ -41,10 +41,10 @@ def session() -> Generator:
 @pytest.fixture()
 def client(session: Session) -> Generator:
     # Use the same session as the session fixture
-    def override_get_db() -> Generator:
+    def override_get_session() -> Generator:
         yield session
 
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_session] = override_get_session
 
     with TestClient(app) as client:
         yield client

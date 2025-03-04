@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import Depends, HTTPException
 from starlette import status
 
-from app.common.api.dependencies.get_db import SessionDependency
+from app.common.api.dependencies.get_session import SessionDependency
 from app.auth.api.dependencies.get_token import TokenDep
 
 from app.auth.utils.security import validate_token
