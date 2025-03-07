@@ -1,5 +1,5 @@
 from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import status
 
 from app.auth.utils import security
@@ -13,20 +13,22 @@ from app.users.services.users_service import UsersService
 
 
 class CreateUserUseCase:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    def execute(self, create_user_request: CreateUserRequest) -> UserResponse:
+    async def execute(
+        self, create_user_request: CreateUserRequest
+    ) -> UserResponse:
         from app.celery.tasks.emails import send_welcome_email
 
         users_service = UsersService(self.session, users_repository)
-        if users_service.get_by_email(create_user_request.email):
+        if await users_service.get_by_email(create_user_request.email):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="User with that email already registered.",
             )
 
-        created_user = users_service.create_user(
+        created_user = await users_service.create_user(
             UserCreate(
                 email=create_user_request.email,
                 hashed_password=security.get_password_hash(

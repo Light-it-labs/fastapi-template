@@ -22,14 +22,14 @@ limiter = Limiter(key_func=get_remote_address)
 
 @router.post("/login", status_code=status.HTTP_204_NO_CONTENT)
 @limiter.limit(settings.AUTHENTICATION_API_RATE_LIMIT)
-def login_access_token(
+async def login_access_token(
     request: Request,
     session: SessionDependency,
     login_data: UserLogin,
     response: Response,
 ) -> None:
     try:
-        AuthUserUseCase(session).execute(login_data, response)
+        await AuthUserUseCase(session).execute(login_data, response)
     except (ModelNotFoundException, InvalidCredentialsException):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

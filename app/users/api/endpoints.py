@@ -16,8 +16,8 @@ def get_current_user(
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_user(
+async def create_user(
     session: SessionDependency,
     create_user_request: CreateUserRequest,
 ) -> UserResponse:
-    return CreateUserUseCase(session).execute(create_user_request)
+    return await CreateUserUseCase(session).execute(create_user_request)

@@ -5,7 +5,8 @@ from uuid import UUID
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.query import Query
 
 from app.common.schemas.pagination_schema import ListFilter, ListResponse
@@ -28,14 +29,22 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
-    def get(self, db: Session, model_id: UUID) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == model_id).first()
+    async def get(
+        self, session: AsyncSession, model_id: UUID
+    ) -> Optional[ModelType]:
+        result = await session.execute(
+            select(self.model).filter(self.model.id == model_id)
+        )
+        return result.scalars().first()
 
-    def list(
-        self, db: Session, list_options: ListFilter, query: Query | None = None
+    async def list(
+        self,
+        session: AsyncSession,
+        list_options: ListFilter,
+        query: Query | None = None,
     ) -> ListResponse:
         if not query:
-            query = db.query(self.model)
+            query = await session.execute(select(self.model))
 
         total = query.count()
 
@@ -50,36 +59,43 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         query = query.limit(list_options.page_size)
         return ListResponse(
-            data=query.all(),
+            data=await query.all(),
             page=list_options.page,
             page_size=list_options.page_size,
             total=total,
             total_pages=ceil(total / list_options.page_size),
         )
 
-    def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
+    async def create(
+        self, session: AsyncSession, obj_in: CreateSchemaType
+    ) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)  # type: ignore
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
         return db_obj
 
-    def update(
-        self, db: Session, db_obj: ModelType, obj_in: UpdateSchemaType
+    async def update(
+        self,
+        session: AsyncSession,
+        db_obj: ModelType,
+        obj_in: UpdateSchemaType,
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
         update_data = obj_in.dict(exclude_unset=True)
         for field in obj_data:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
         return db_obj
 
-    def delete(self, db: Session, model_id: UUID) -> ModelType | None:
-        obj = db.query(self.model).get(model_id)
-        db.delete(obj)
-        db.commit()
+    async def delete(
+        self, session: AsyncSession, model_id: UUID
+    ) -> ModelType | None:
+        obj = await self.get(session, model_id)
+        await session.delete(obj)
+        await session.commit()
         return obj

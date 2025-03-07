@@ -7,7 +7,7 @@ from app.common.api.dependencies.get_session import get_session
 from app.core.config import get_settings
 from app.db.session import engine, SessionLocal
 from app.main import app
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 settings = get_settings()
 TEST_DATABASE_URI = settings.SQLALCHEMY_DATABASE_URI
@@ -25,7 +25,9 @@ def session() -> Generator:
     # If the application code calls session.commit, it will end the nested
     # transaction. Need to start a new one when that happens.
     @event.listens_for(session, "after_transaction_end")
-    def end_savepoint(session: Session, transaction: RootTransaction) -> None:
+    def end_savepoint(
+        session: AsyncSession, transaction: RootTransaction
+    ) -> None:
         nonlocal nested
         if not nested.is_active:
             nested = connection.begin_nested()
@@ -39,7 +41,7 @@ def session() -> Generator:
 
 
 @pytest.fixture()
-def client(session: Session) -> Generator:
+def client(session: AsyncSession) -> Generator:
     # Use the same session as the session fixture
     def override_get_session() -> Generator:
         yield session

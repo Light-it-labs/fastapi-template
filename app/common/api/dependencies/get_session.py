@@ -1,21 +1,14 @@
-from typing import Annotated, Generator
+from typing import Annotated, AsyncGenerator
 
+from app.db.database_session_manager import DatabaseSessionManager
 from fastapi import Depends
-from sqlalchemy.orm import Session
-
-from app.db.session import SessionLocal
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-def get_session() -> Generator:
-    session = SessionLocal()
-    try:
+async def get_session() -> AsyncGenerator:
+    session_manager = DatabaseSessionManager().init()
+    async with session_manager.session() as session:
         yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
 
 
-SessionDependency = Annotated[Session, Depends(get_session)]
+SessionDependency = Annotated[AsyncSession, Depends(get_session)]

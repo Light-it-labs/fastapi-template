@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.testclient import TestClient
 
@@ -8,7 +8,7 @@ login_path = "api/v1/auth/login"
 
 
 class TestLogin:
-    def test_login(self, client: TestClient, session: Session):
+    def test_login(self, client: TestClient, session: AsyncSession):
         created_user = create_user(session)
 
         response = client.post(
@@ -22,7 +22,7 @@ class TestLogin:
         assert response.status_code == 204
 
     def test_login_incorrect_password(
-        self, client: TestClient, session: Session
+        self, client: TestClient, session: AsyncSession
     ):
         created_user = create_user(session)
 
@@ -37,7 +37,7 @@ class TestLogin:
         assert response.status_code == 401
 
     def test_login_non_existent_email(
-        self, client: TestClient, session: Session
+        self, client: TestClient, session: AsyncSession
     ):
         create_user(session)
 

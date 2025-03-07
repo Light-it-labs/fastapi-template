@@ -1,18 +1,18 @@
+from app.db.database_session_manager import DatabaseSessionManager
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette import status
 
-from app.db.session import engine
-
 router = APIRouter()
 
 
 @router.get("")
-def check_database_health() -> dict:
+async def check_database_health() -> dict:
+    session_manager = DatabaseSessionManager().init()
     try:
-        with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
+        async with session_manager.session() as session:
+            session.execute(text("SELECT 1"))
         return {"status": "ok", "message": "Database is healthy"}
     except OperationalError as e:
         error_message = str(e)

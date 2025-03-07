@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.utils import security
 from app.users.repositories.users_repository import users_repository
@@ -7,7 +7,7 @@ from app.users.services.users_service import UsersService
 
 
 def create_user(
-    session: Session,
+    session: AsyncSession,
 ) -> UserInDB:
     hashed_password = security.get_password_hash("password")
     new_user = UserCreate(

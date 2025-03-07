@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from fastapi import Response
@@ -10,11 +10,11 @@ from app.users.repositories.users_repository import users_repository
 
 
 class AuthUserUseCase:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    def execute(self, login_data: UserLogin, response: Response) -> None:
-        patient = AuthService(self.session, users_repository).authenticate(
-            login_data
-        )
+    async def execute(self, login_data: UserLogin, response: Response) -> None:
+        patient = await AuthService(
+            self.session, users_repository
+        ).authenticate(login_data)
         set_http_only_cookie(patient.id, "access_token", response)

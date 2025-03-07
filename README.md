@@ -7,7 +7,7 @@ Auth Service in FastAPI
 1. Install [Poetry](https://python-poetry.org/).
    `pip install poetry`
 2. Access Poetry shell.
-   `poetry shell`
+   `poetry env activate`
 3. Install dependencies.
    `poetry install`
 

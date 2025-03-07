@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schemas.auth_schema import UserLogin
 from app.common.exceptions.model_not_found_exception import (
@@ -13,12 +13,12 @@ from app.users.schemas.user_schema import UserAuth
 
 
 class AuthService:
-    def __init__(self, session: Session, repository: UsersRepository):
+    def __init__(self, session: AsyncSession, repository: UsersRepository):
         self.session = session
         self.repository = repository
 
-    def authenticate(self, login_data: UserLogin) -> UserAuth:
-        user = self.repository.get_by_email(
+    async def authenticate(self, login_data: UserLogin) -> UserAuth:
+        user = await self.repository.get_by_email(
             self.session, email=login_data.email
         )
         if not user:

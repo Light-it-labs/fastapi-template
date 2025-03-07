@@ -67,7 +67,7 @@ class Settings(BaseSettings):
         if isinstance(field_value, str):
             return field_value
         return PostgresDsn.build(
-            scheme="postgresql+psycopg2",
+            scheme="postgresql+asyncpg",
             username=info.data.get("POSTGRES_USER"),
             password=info.data.get("POSTGRES_PASSWORD"),
             host=info.data.get("POSTGRES_SERVER"),

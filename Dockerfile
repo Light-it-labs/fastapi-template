@@ -7,7 +7,7 @@ ENV LANG=en_US.UTF-8 \
     BASE_DIR=/code \
     POETRY_VERSION=2.1
 
-RUN pip install psycopg2-binary
+RUN pip install psycopg2-binary asyncpg
 
 WORKDIR $BASE_DIR
 

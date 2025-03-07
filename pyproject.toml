@@ -30,6 +30,8 @@ structlog-sentry = "^2.1.0"
 slowapi = "^0.1.9"
 celery = "^5.4.0"
 pyjwt = "^2.10.1"
+sqlalchemy = {version = "^2.0.38", extras = ["asyncio"]}
+ruff = "^0.9.10"
 
 
 [tool.poetry.group.dev.dependencies]
