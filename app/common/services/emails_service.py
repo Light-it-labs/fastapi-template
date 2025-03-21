@@ -8,7 +8,7 @@ from app.users.schemas.user_schema import UserInDB
 
 
 class Paths(Enum):
-    NEW_USER = "app/email_templates/welcome_email.html"
+    NEW_USER = "app/common/email_templates/welcome_email.html"
 
 
 class EmailService:

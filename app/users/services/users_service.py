@@ -8,7 +8,11 @@ from app.users.schemas.user_schema import UserCreate, UserInDB
 
 
 class UsersService:
-    def __init__(self, session: Session, repository: UsersRepository):
+    def __init__(
+        self,
+        session: Session,
+        repository: UsersRepository,
+    ):
         self.session = session
         self.repository = repository
 
