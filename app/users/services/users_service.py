@@ -8,9 +8,15 @@ from app.users.schemas.user_schema import UserCreate, UserInDB
 
 
 class UsersService:
-    def __init__(self, session: Session, repository: UsersRepository):
+    def __init__(
+        self,
+        session: Session,
+        repository: UsersRepository,
+        with_commit: bool = True,
+    ):
         self.session = session
         self.repository = repository
+        self.with_commit = with_commit
 
     def get_by_email(self, email: str) -> UserInDB | None:
         user = self.repository.get_by_email(self.session, email)
@@ -26,6 +32,8 @@ class UsersService:
 
     def create_user(self, user: UserCreate) -> UserInDB:
         created_user = self.repository.create(self.session, user)
+        if self.with_commit:
+            self.session.commit()
         return UserInDB.model_validate(created_user)
 
     def list(self, list_options: ListFilter) -> ListResponse:
