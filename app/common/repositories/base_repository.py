@@ -74,7 +74,6 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 setattr(db_obj, field, update_data[field])
         db.add(db_obj)
         db.flush()
-        db.refresh(db_obj)
         return db_obj
 
     def delete(self, db: Session, model_id: UUID) -> ModelType | None:
