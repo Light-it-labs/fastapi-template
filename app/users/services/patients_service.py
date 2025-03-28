@@ -30,6 +30,7 @@ class PatientsService(
     def __init__(self, session: Session, repository: PatientsRepository):
         self.session = session
         self.repository = repository
+        self.joined_loads = ["provider"]
 
     def create(self, create_data: PatientCreate) -> PatientInDB:
         created_patient = self.repository.create(self.session, create_data)
@@ -46,7 +47,9 @@ class PatientsService(
         return PatientInDB.model_validate(created_patient)
 
     def get_by_email(self, email: str) -> PatientInDB | None:
-        user = self.repository.get_by_email(self.session, email)
+        user = self.repository.get_by_email(
+            self.session, email, joined_loads=self.joined_loads
+        )
         if not user:
             return None
         return PatientInDB.model_validate(user)

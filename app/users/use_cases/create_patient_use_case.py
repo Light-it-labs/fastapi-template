@@ -22,7 +22,7 @@ class CreatePatientUseCase:
     def execute(
         self, create_patient_request: CreatePatientRequest
     ) -> PatientResponse:
-        # from app.celery.tasks.emails import send_welcome_email
+        from app.celery.tasks.emails import send_welcome_email
 
         patients_service = PatientsService(self.session, patients_repository)
         providers_service = ProvidersService(
@@ -57,6 +57,6 @@ class CreatePatientUseCase:
             )
         )
 
-        # send_welcome_email.delay(created_user.id)  # type: ignore
+        send_welcome_email.delay(created_patient.id)  # type: ignore
 
         return PatientResponse(**created_patient.model_dump())

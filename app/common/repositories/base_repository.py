@@ -1,11 +1,11 @@
 from math import ceil
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, List, Type, TypeVar
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.orm.query import Query
 
 from app.common.schemas.pagination_schema import ListFilter, ListResponse
@@ -28,8 +28,21 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
-    def get(self, db: Session, model_id: UUID) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == model_id).first()
+    def get(
+        self,
+        db: Session,
+        model_id: UUID,
+        joined_loads: List[str] | None = None,
+    ) -> ModelType | None:
+        query = db.query(self.model).filter(self.model.id == model_id)
+
+        if joined_loads:
+            for relation in joined_loads:
+                query = query.options(
+                    joinedload(getattr(self.model, relation))
+                )
+
+        return query.first()
 
     def list(
         self, db: Session, list_options: ListFilter, query: Query | None = None

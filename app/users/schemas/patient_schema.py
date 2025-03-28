@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, StringConstraints
 
+from app.users.schemas.provider_schema import ProviderInDB
 from app.users.schemas.user_schema import (
     UserBase,
     UserCreate,
@@ -25,6 +26,7 @@ class PatientUpdate(UserUpdate):
 
 class PatientInDB(UserInDB, PatientBase):
     provider_id: UUID
+    provider: ProviderInDB
 
 
 class PatientResponse(PatientInDB):
