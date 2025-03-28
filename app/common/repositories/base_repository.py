@@ -17,7 +17,9 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
 class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, model: Type[ModelType]):
+    def __init__(
+        self, model: Type[ModelType], joined_loads: List[str] | None = None
+    ):
         """
         CRUD object with default methods to Create, Read, Update, Delete (CRUD).
 
@@ -27,17 +29,17 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         * `schema`: A Pydantic model (schema) class
         """
         self.model = model
+        self.joined_loads = joined_loads
 
     def get(
         self,
         db: Session,
         model_id: UUID,
-        joined_loads: List[str] | None = None,
     ) -> ModelType | None:
         query = db.query(self.model).filter(self.model.id == model_id)
 
-        if joined_loads:
-            for relation in joined_loads:
+        if self.joined_loads is not None:
+            for relation in self.joined_loads:
                 query = query.options(
                     joinedload(getattr(self.model, relation))
                 )
@@ -81,7 +83,7 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, db: Session, db_obj: ModelType, obj_in: UpdateSchemaType
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field in obj_data:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])

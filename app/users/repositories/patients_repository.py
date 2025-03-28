@@ -9,4 +9,4 @@ class PatientsRepository(
     pass
 
 
-patients_repository = PatientsRepository(Patient)
+patients_repository = PatientsRepository(Patient, joined_loads=["provider"])
