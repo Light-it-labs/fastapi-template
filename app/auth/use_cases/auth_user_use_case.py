@@ -6,14 +6,19 @@ from fastapi import Response
 from app.auth.schemas.auth_schema import UserLogin
 from app.auth.services.auth_service import AuthService
 from app.auth.utils.set_http_only_cookie import set_http_only_cookie
-from app.users.repositories.users_repository import users_repository
+from app.users.repositories.users_repository import UsersRepository
 
 
 class AuthUserUseCase:
     def __init__(self, session: Session):
         self.session = session
 
-    def execute(self, login_data: UserLogin, response: Response) -> None:
+    def execute(
+        self,
+        login_data: UserLogin,
+        response: Response,
+        users_repository: UsersRepository,
+    ) -> None:
         patient = AuthService(self.session, users_repository).authenticate(
             login_data
         )

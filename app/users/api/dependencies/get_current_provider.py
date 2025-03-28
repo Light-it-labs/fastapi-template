@@ -11,19 +11,21 @@ from app.auth.utils.security import validate_token
 from app.auth.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
 )
-from app.users.repositories.users_repository import users_repository
 from app.users.schemas.user_schema import UserInDB
-from app.users.services.users_service import UsersService
+from app.users.services.providers_service import ProvidersService
+from app.users.repositories.providers_repository import providers_repository
 
 
-def get_current_user(session: SessionDependency, token: TokenDep) -> UserInDB:
+def get_current_provider(
+    session: SessionDependency, token: TokenDep
+) -> UserInDB:
     try:
         token_data = validate_token(token)
     except InvalidCredentialsException as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail=e.message
         )
-    provider = UsersService(session, users_repository).get_by_id(
+    provider = ProvidersService(session, providers_repository).get_by_id(
         UUID(token_data.user_id)
     )
     if not provider:
@@ -31,4 +33,4 @@ def get_current_user(session: SessionDependency, token: TokenDep) -> UserInDB:
     return provider
 
 
-CurrentUser = Annotated[UserInDB, Depends(get_current_user)]
+CurrentProvider = Annotated[UserInDB, Depends(get_current_provider)]
