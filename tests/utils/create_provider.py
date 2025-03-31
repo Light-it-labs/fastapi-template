@@ -1,4 +1,3 @@
-from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from app.auth.utils import security
@@ -9,10 +8,10 @@ from app.users.schemas.user_schema import UserInDB
 from app.users.services.providers_service import ProvidersService
 
 
-def create_provider(session: Session, email: EmailStr) -> UserInDB:
+def create_provider(session: Session) -> UserInDB:
     hashed_password = security.get_password_hash("password")
     new_user = ProviderCreate(
-        email=email,
+        email="test0@provider.com",
         hashed_password=hashed_password,
         first_name="Provider",
         last_name="Test",
