@@ -1,4 +1,3 @@
-from math import ceil
 from typing import Any, Generic, List, Type, TypeVar
 from uuid import UUID
 
@@ -8,7 +7,7 @@ from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.orm.query import Query
 
-from app.common.schemas.pagination_schema import ListFilter, ListResponse
+from app.common.schemas.pagination_schema import ListFilter
 
 
 ModelType = TypeVar("ModelType", bound=Any)
@@ -48,11 +47,9 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     def list(
         self, db: Session, list_options: ListFilter, query: Query | None = None
-    ) -> ListResponse:
+    ) -> List[ModelType]:
         if not query:
             query = db.query(self.model)
-
-        total = query.count()
 
         if list_options.order_by:
             column = list_options.order_by
@@ -62,15 +59,9 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             query = query.order_by(by(column))
 
         query = query.offset(list_options.page_size * (list_options.page - 1))
-
         query = query.limit(list_options.page_size)
-        return ListResponse(
-            data=query.all(),
-            page=list_options.page,
-            page_size=list_options.page_size,
-            total=total,
-            total_pages=ceil(total / list_options.page_size),
-        )
+
+        return query.all()
 
     def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)

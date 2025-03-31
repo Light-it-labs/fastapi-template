@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Generic, List, TypeVar
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.common.schemas.pagination_schema import ListFilter, ListResponse
+from app.common.schemas.pagination_schema import ListFilter
 from app.users.repositories.users_repository import UsersRepository
 
 TInDB = TypeVar("TInDB")
@@ -34,5 +34,6 @@ class UsersService(ABC, Generic[TInDB, TCreate, TUpdate]):
     def get_by_id(self, user_id: UUID) -> TInDB | None:
         pass
 
-    def list(self, list_options: ListFilter) -> ListResponse:
-        return self.repository.list(self.session, list_options)
+    @abstractmethod
+    def list(self, list_options: ListFilter) -> List[TInDB]:
+        pass

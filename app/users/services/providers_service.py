@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import List, TypeVar
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.common.exceptions.model_not_found_exception import (
     ModelNotFoundException,
 )
+from app.common.schemas.pagination_schema import ListFilter
 from app.users.repositories.providers_repository import ProvidersRepository
 from app.users.schemas.provider_schema import (
     ProviderUpdate,
@@ -58,3 +59,9 @@ class ProvidersService(
         if not user:
             return None
         return ProviderInDB.model_validate(user)
+
+    def list(self, list_options: ListFilter) -> List[ProviderInDB]:
+        providers = self.repository.list(self.session, list_options)
+        return [
+            ProviderInDB.model_validate(provider) for provider in providers
+        ]

@@ -23,7 +23,7 @@ def send_reminder_email() -> None:
         patients = PatientsService(session, patients_repository).list(
             ListFilter(page=1, page_size=100)
         )
-        for patient in patients.data:
+        for patient in patients:
             EmailService(ExampleEmailClient()).send_user_remind_email(
                 UserInDB.model_validate(patient)
             )
