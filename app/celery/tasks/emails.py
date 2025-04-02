@@ -8,9 +8,10 @@ from app.main import celery
 
 
 from app.core.config import get_settings
-from app.users.repositories.users_repository import users_repository
+from app.users.repositories.patients_repository import patients_repository
+from app.users.schemas.patient_schema import PatientInDB
 from app.users.schemas.user_schema import UserInDB
-from app.users.services.users_service import UsersService
+from app.users.services.patients_service import PatientsService
 
 settings = get_settings()
 
@@ -19,12 +20,12 @@ settings = get_settings()
 def send_reminder_email() -> None:
     session = SessionLocal()
     try:
-        users = UsersService(session, users_repository).list(
+        patients = PatientsService(session, patients_repository).list(
             ListFilter(page=1, page_size=100)
         )
-        for user in users.data:
+        for patient in patients:
             EmailService(ExampleEmailClient()).send_user_remind_email(
-                UserInDB.model_validate(user)
+                UserInDB.model_validate(patient)
             )
     finally:
         session.close()
@@ -36,13 +37,15 @@ def send_reminder_email() -> None:
     max_retries=settings.SEND_WELCOME_EMAIL_MAX_RETRIES,
     retry_jitter=False,
 )
-def send_welcome_email(user_id: UUID) -> None:
+def send_welcome_email(patient_id: UUID) -> None:
     session = SessionLocal()
     try:
-        user = UsersService(session, users_repository).get_by_id(user_id)
-        if user:
+        patient = PatientsService(session, patients_repository).get_by_id(
+            patient_id
+        )
+        if patient:
             EmailService(ExampleEmailClient()).send_new_user_email(
-                UserInDB.model_validate(user)
+                PatientInDB.model_validate(patient)
             )
     finally:
         session.close()

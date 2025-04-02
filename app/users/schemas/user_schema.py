@@ -2,14 +2,21 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from app.users.enums.user_type_enum import UserTypeEnum
+
 
 class UserBase(BaseModel):
     email: EmailStr
+    hashed_password: str
+    type: UserTypeEnum
 
 
 class UserCreate(BaseModel):
     email: EmailStr
     hashed_password: str
+    type: UserTypeEnum
+    first_name: str
+    last_name: str
 
 
 class UserUpdate(BaseModel):
@@ -24,11 +31,6 @@ class UserInDB(UserBase):
 
 class UserResponse(UserInDB):
     pass
-
-
-class CreateUserRequest(BaseModel):
-    email: EmailStr
-    password: str
 
 
 class UserAuth(BaseModel):

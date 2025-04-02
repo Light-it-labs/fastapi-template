@@ -2,14 +2,14 @@ from sqlalchemy.orm import Session
 
 from fastapi.testclient import TestClient
 
-from tests.utils.create_user import create_user
+from tests.utils.create_provider import create_provider
 
-login_path = "api/v1/auth/login"
+login_path = "api/v1/auth/providers/login"
 
 
 class TestLogin:
-    def test_login(self, client: TestClient, session: Session):
-        created_user = create_user(session)
+    def test_login(self, client: TestClient, session: Session) -> None:
+        created_user = create_provider(session)
 
         response = client.post(
             login_path,
@@ -23,8 +23,8 @@ class TestLogin:
 
     def test_login_incorrect_password(
         self, client: TestClient, session: Session
-    ):
-        created_user = create_user(session)
+    ) -> None:
+        created_user = create_provider(session)
 
         response = client.post(
             login_path,
@@ -38,8 +38,8 @@ class TestLogin:
 
     def test_login_non_existent_email(
         self, client: TestClient, session: Session
-    ):
-        create_user(session)
+    ) -> None:
+        create_provider(session)
 
         response = client.post(
             login_path,

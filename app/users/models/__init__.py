@@ -1,1 +1,3 @@
-from .user import User  # noqa
+from .user import User
+from .patient import Patient
+from .provider import Provider
