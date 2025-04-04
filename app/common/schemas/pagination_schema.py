@@ -1,4 +1,4 @@
-from typing import List, Literal, Annotated
+from typing import Literal, Annotated
 
 from pydantic import BaseModel, Field
 
@@ -14,7 +14,7 @@ class ListFilter(BaseModel):
 
 
 class ListResponse[T](BaseModel):
-    data: List[T]
+    data: list[T]
     page: Annotated[int, _PageField]
     page_size: Annotated[int, _PageSizeField]
     total: int
