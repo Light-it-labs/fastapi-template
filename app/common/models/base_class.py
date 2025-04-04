@@ -1,31 +1,30 @@
-import uuid
+from uuid import UUID, uuid4
+from datetime import datetime
 
-from sqlalchemy import UUID, Column, DateTime, func
-from sqlalchemy.orm import declared_attr, registry
+from sqlalchemy import func
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    declared_attr,
+)
 
-mapper_registry: registry = registry()
 
-
-@mapper_registry.as_declarative_base()
-class Base:
+class Base(DeclarativeBase):
     __abstract__ = True
 
-    id = Column(
-        UUID(as_uuid=True),
-        default=uuid.uuid4,
+    id: Mapped[UUID] = mapped_column(
+        default=uuid4,
         primary_key=True,
-        nullable=False,
     )
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+    created_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(),
     )
-    updated_at = Column(
-        DateTime(timezone=True),
+    updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(),
         onupdate=func.now(),
-        nullable=False,
     )
 
     @declared_attr
-    def __tablename__(cls):
+    def __tablename__(cls) -> str:
         return cls.__name__.lower()
