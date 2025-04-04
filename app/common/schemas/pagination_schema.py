@@ -1,22 +1,21 @@
-from typing import Generic, List, Literal, TypeVar
+from typing import List, Literal, Annotated
 
-from pydantic import BaseModel, conint
+from pydantic import BaseModel, Field
+
+_PageField = Field(ge=1)
+_PageSizeField = Field(ge=1, le=100)
 
 
 class ListFilter(BaseModel):
-    page: conint(ge=1) = 1
-    page_size: conint(ge=1, le=100) = 10
-    name: str | None = None
+    page: Annotated[int, _PageField] = 1
+    page_size: Annotated[int, _PageSizeField] = 10
     order: Literal["asc", "desc"] | None = None
     order_by: str | None = None
 
 
-T = TypeVar("T")
-
-
-class ListResponse(BaseModel, Generic[T]):
+class ListResponse[T](BaseModel):
     data: List[T]
-    page_size: conint(ge=1, le=100)
-    page: conint(ge=1)
+    page: Annotated[int, _PageField]
+    page_size: Annotated[int, _PageSizeField]
     total: int
     total_pages: int
