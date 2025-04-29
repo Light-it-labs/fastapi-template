@@ -1,14 +1,13 @@
-from math import ceil
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, List, Type, TypeVar
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.orm.query import Query
 
-from app.common.schemas.pagination_schema import ListFilter, ListResponse
+from app.common.schemas.pagination_schema import ListFilter
 
 
 ModelType = TypeVar("ModelType", bound=Any)
@@ -17,7 +16,9 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
 class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, model: Type[ModelType]):
+    def __init__(
+        self, model: Type[ModelType], joined_loads: List[str] | None = None
+    ):
         """
         CRUD object with default methods to Create, Read, Update, Delete (CRUD).
 
@@ -27,17 +28,28 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         * `schema`: A Pydantic model (schema) class
         """
         self.model = model
+        self.joined_loads = joined_loads
 
-    def get(self, db: Session, model_id: UUID) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == model_id).first()
+    def get(
+        self,
+        db: Session,
+        model_id: UUID,
+    ) -> ModelType | None:
+        query = db.query(self.model).filter(self.model.id == model_id)
+
+        if self.joined_loads is not None:
+            for relation in self.joined_loads:
+                query = query.options(
+                    joinedload(getattr(self.model, relation))
+                )
+
+        return query.first()
 
     def list(
         self, db: Session, list_options: ListFilter, query: Query | None = None
-    ) -> ListResponse:
+    ) -> List[ModelType]:
         if not query:
             query = db.query(self.model)
-
-        total = query.count()
 
         if list_options.order_by:
             column = list_options.order_by
@@ -47,15 +59,9 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             query = query.order_by(by(column))
 
         query = query.offset(list_options.page_size * (list_options.page - 1))
-
         query = query.limit(list_options.page_size)
-        return ListResponse(
-            data=query.all(),
-            page=list_options.page,
-            page_size=list_options.page_size,
-            total=total,
-            total_pages=ceil(total / list_options.page_size),
-        )
+
+        return query.all()
 
     def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
@@ -68,7 +74,7 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, db: Session, db_obj: ModelType, obj_in: UpdateSchemaType
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field in obj_data:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])

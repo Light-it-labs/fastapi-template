@@ -28,3 +28,7 @@ We use ruff as linter, to run them on pre-commit please run `pre-commit install`
 
 - You can run tests locally by running `./tests-start.sh` (this will use your local database).
 - Tests can also run in docker container with the following command: `docker-compose exec api ./tests-start.sh`.
+
+### Seed db
+
+Run `./scripts/seed-db.sh`
