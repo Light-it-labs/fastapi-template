@@ -28,7 +28,7 @@ class CreateUserUseCase:
 
         created_user = users_service.create_user(
             UserCreate(
-                email=create_user_request.email,
+                email=create_user_request.email.lower(),
                 hashed_password=security.get_password_hash(
                     create_user_request.password
                 ),
