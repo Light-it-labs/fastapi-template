@@ -21,7 +21,7 @@ def get_current_user(session: SessionDependency, token: TokenDep) -> UserInDB:
         token_data = validate_token(token)
     except InvalidCredentialsException as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=e.message
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=e.message
         )
     provider = UsersService(session, users_repository).get_by_id(
         UUID(token_data.user_id)
