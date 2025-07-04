@@ -4,9 +4,8 @@ from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, func, select, Select
 from sqlalchemy.orm import Session
-from sqlalchemy.orm.query import Query
 
 from app.common.schemas.pagination_schema import ListFilter, ListResponse
 
@@ -32,12 +31,16 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db.query(self.model).filter(self.model.id == model_id).first()
 
     def list(
-        self, db: Session, list_options: ListFilter, query: Query | None = None
+        self,
+        db: Session,
+        list_options: ListFilter,
+        query: Select | None = None,
     ) -> ListResponse:
-        if not query:
-            query = db.query(self.model)
-
-        total = query.count()
+        if query is None:
+            query = select(self.model)
+            count_query = select(func.count()).select_from(self.model)
+        else:
+            count_query = select(func.count()).select_from(query.subquery())
 
         if list_options.order_by:
             column = list_options.order_by
@@ -47,10 +50,12 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             query = query.order_by(by(column))
 
         query = query.offset(list_options.page_size * (list_options.page - 1))
-
         query = query.limit(list_options.page_size)
+
+        total = db.execute(count_query).scalar_one()
+
         return ListResponse(
-            data=query.all(),
+            data=db.execute(query).scalars().all(),
             page=list_options.page,
             page_size=list_options.page_size,
             total=total,
