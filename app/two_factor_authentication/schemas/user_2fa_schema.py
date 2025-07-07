@@ -1,8 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr
-
-from app.users.schemas.user_schema import UserInDB
+from pydantic import BaseModel, ConfigDict
 
 
 class User2FABase(BaseModel):
@@ -20,7 +18,6 @@ class User2FAUpdate(User2FABase): ...
 class User2FAInDB(User2FABase):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
-    user: UserInDB
 
 
 class User2FAResponse(BaseModel):
@@ -30,3 +27,4 @@ class User2FAResponse(BaseModel):
 class VerifyUser2FARequest(BaseModel):
     user_id: UUID
     user_code: str
+    mark_active: bool
