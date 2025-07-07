@@ -6,7 +6,7 @@ from app.users.schemas.user_schema import UserInDB
 
 
 class User2FABase(BaseModel):
-    secret_: str
+    secret_key: str
     active: bool
 
 
@@ -23,5 +23,5 @@ class User2FAInDB(User2FABase):
     user: UserInDB
 
 
-class User2FAResponse(User2FAInDB):
-    pass
+class User2FAResponse(BaseModel):
+    provisioning_url: str

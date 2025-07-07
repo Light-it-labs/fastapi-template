@@ -17,4 +17,4 @@ class Users2FARepository(
         return db.query(self.model).filter(Users2FA.user_id == user_id).first()
 
 
-user_2fa_s_repository = Users2FARepository(Users2FA)
+users_2fa_repository = Users2FARepository(Users2FA)

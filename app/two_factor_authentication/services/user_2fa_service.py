@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.two_factor_authentication.repositories.user_2fa_keys_repository import (
+from app.two_factor_authentication.repositories.user_2fa_repository import (
     Users2FARepository,
 )
 from app.two_factor_authentication.schemas.user_2fa_schema import (
@@ -11,7 +11,7 @@ from app.two_factor_authentication.schemas.user_2fa_schema import (
 )
 
 
-class Users2FAKeysService:
+class Users2FAService:
     def __init__(
         self,
         session: Session,
