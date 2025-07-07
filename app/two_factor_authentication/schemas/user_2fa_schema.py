@@ -27,4 +27,4 @@ class User2FAResponse(BaseModel):
 class VerifyUser2FARequest(BaseModel):
     user_id: UUID
     user_code: str
-    mark_active: bool
+    mark_active: bool = False
