@@ -1,4 +1,5 @@
 from uuid import UUID
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 
@@ -13,8 +14,25 @@ from app.two_factor_authentication.schemas.user_2fa_schema import (
 class Users2FARepository(
     BaseRepository[Users2FA, User2FACreate, User2FAUpdate]
 ):
-    def get_by_user_id(self, db: Session, user_id: UUID) -> Users2FA | None:
-        return db.query(self.model).filter(Users2FA.user_id == user_id).first()
+    def get_by_user_id(
+        self, session: Session, user_id: UUID
+    ) -> Users2FA | None:
+        return (
+            session.query(self.model)
+            .filter(Users2FA.user_id == user_id)
+            .first()
+        )
+
+    def toggle_active(
+        self, session: Session, user_2fa_id: UUID, active: bool
+    ) -> None:
+        stmt = (
+            update(Users2FA)
+            .where(Users2FA.id == user_2fa_id)
+            .values(active=active)  # 3. Set new values
+        )
+        session.execute(stmt)
+        session.flush()
 
 
 users_2fa_repository = Users2FARepository(Users2FA)

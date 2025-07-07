@@ -22,6 +22,7 @@ settings = get_settings()
 class VerifyUser2FAUseCase:
     def __init__(self, session: Session):
         self.session = session
+        self.service = Users2FAService(self.session, users_2fa_repository)
 
     def execute(self, data: VerifyUser2FARequest) -> bool:
         user = UsersService(self.session, users_repository).get_by_id(
@@ -30,12 +31,13 @@ class VerifyUser2FAUseCase:
         if not user:
             raise ModelNotFoundException("User not found")
 
-        user_2fa = Users2FAService(
-            self.session, users_2fa_repository
-        ).get_by_user_id(user.id)
+        user_2fa = self.service.get_by_user_id(user.id)
 
         if not user_2fa:
             raise ModelNotFoundException("User 2FA not found")
+
+        if data.mark_active:
+            self.service.toggle_active(user_2fa.id, True)
 
         totp = pyotp.TOTP(user_2fa.secret_key)
 

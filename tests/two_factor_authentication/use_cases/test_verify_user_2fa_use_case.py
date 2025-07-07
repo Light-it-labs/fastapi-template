@@ -43,6 +43,34 @@ class TestVerifyUser2FAUseCase:
 
         assert is_valid
 
+    def test_verify_correct_user_2fa_and_mark_active(
+        self, session: Session
+    ) -> None:
+        created_user = create_user(session)
+        CreateNewUser2FAUseCase(session).execute(created_user.email)
+
+        user_2fa = Users2FAService(
+            session, users_2fa_repository
+        ).get_by_user_id(created_user.id)
+
+        assert user_2fa and not user_2fa.active
+
+        totp = pyotp.TOTP(user_2fa.secret_key)
+        valid_code = totp.now()
+
+        data = VerifyUser2FARequest(
+            user_id=created_user.id, user_code=valid_code, mark_active=True
+        )
+        is_valid = VerifyUser2FAUseCase(session).execute(data)
+
+        user_2fa = Users2FAService(
+            session, users_2fa_repository
+        ).get_by_user_id(created_user.id)
+
+        assert user_2fa and user_2fa.active
+
+        assert is_valid
+
     def test_verify_incorrect_user_2fa(self, session: Session) -> None:
         created_user = create_user(session)
         CreateNewUser2FAUseCase(session).execute(created_user.email)

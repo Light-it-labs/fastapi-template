@@ -29,3 +29,6 @@ class Users2FAService:
     def create_user_2fa(self, user_2fa: User2FACreate) -> User2FAInDB:
         created_user_2fa = self.repository.create(self.session, user_2fa)
         return User2FAInDB.model_validate(created_user_2fa)
+
+    def toggle_active(self, user_2fa_id: UUID, active: bool) -> None:
+        self.repository.toggle_active(self.session, user_2fa_id, active)
