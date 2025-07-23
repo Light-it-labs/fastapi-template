@@ -29,7 +29,7 @@ class Users2FARepository(
         stmt = (
             update(Users2FA)
             .where(Users2FA.id == user_2fa_id)
-            .values(active=active)  # 3. Set new values
+            .values(active=active)
         )
         session.execute(stmt)
         session.flush()
