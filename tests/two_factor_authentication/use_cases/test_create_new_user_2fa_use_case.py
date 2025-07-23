@@ -1,10 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.two_factor_authentication.repositories.user_2fa_repository import (
-    users_2fa_repository,
-)
-from app.two_factor_authentication.services.user_2fa_service import (
+from app.two_factor_authentication.services.users_2fa_service import (
     Users2FAService,
 )
 from app.two_factor_authentication.use_cases.create_new_user_2fa_use_case import (
@@ -21,9 +18,7 @@ class TestCreateNewUser2FAUseCase:
         created_user = create_user(session)
         response = CreateNewUser2FAUseCase(session).execute(created_user.email)
 
-        user_2fa = Users2FAService(
-            session, users_2fa_repository
-        ).get_by_user_id(created_user.id)
+        user_2fa = Users2FAService(session).get_by_user_id(created_user.id)
 
         assert user_2fa
 
