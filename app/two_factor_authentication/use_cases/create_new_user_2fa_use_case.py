@@ -24,17 +24,17 @@ settings = get_settings()
 class CreateNewUser2FAUseCase:
     def __init__(self, session: Session):
         self.session = session
+        self.users_service = UsersService(self.session, users_repository)
+        self.users_2fa_service = Users2FAService(self.session)
 
     def execute(self, user_email: EmailStr) -> User2FAResponse:
         secret_key = pyotp.random_base32()
 
-        user = UsersService(self.session, users_repository).get_by_email(
-            user_email
-        )
+        user = self.users_service.get_by_email(user_email)
         if not user:
             raise ModelNotFoundException("User not found")
 
-        user_2fa = Users2FAService(self.session).create_user_2fa(
+        user_2fa = self.users_2fa_service.create_user_2fa(
             User2FACreate(secret_key=secret_key, active=False, user_id=user.id)
         )
 
