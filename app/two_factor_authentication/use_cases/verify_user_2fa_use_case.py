@@ -5,7 +5,7 @@ from app.common.exceptions.model_not_found_exception import (
 )
 from app.core.config import get_settings
 from app.two_factor_authentication.schemas.user_2fa_schema import (
-    VerifyUser2FARequest,
+    VerifyUser2FAData,
 )
 from app.two_factor_authentication.services.users_2fa_service import (
     Users2FAService,
@@ -22,7 +22,7 @@ class VerifyUser2FAUseCase:
         self.users_service = UsersService(self.session, users_repository)
         self.users_2fa_service = Users2FAService(self.session)
 
-    def execute(self, data: VerifyUser2FARequest) -> bool:
+    def execute(self, data: VerifyUser2FAData) -> bool:
         user = self.users_service.get_by_id(data.user_id)
         if not user:
             raise ModelNotFoundException("User not found")

@@ -24,7 +24,12 @@ class User2FAResponse(BaseModel):
     provisioning_url: str
 
 
-class VerifyUser2FARequest(BaseModel):
+class VerifyUser2FAData(BaseModel):
     user_id: UUID
+    user_code: str
+    mark_active: bool = False
+
+
+class VerifyUser2FARequest(BaseModel):
     user_code: str
     mark_active: bool = False
