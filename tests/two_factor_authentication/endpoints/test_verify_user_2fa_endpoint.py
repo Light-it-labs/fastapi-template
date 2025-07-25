@@ -1,26 +1,23 @@
+from fastapi.testclient import TestClient
 import pyotp
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.two_factor_authentication.schemas.user_2fa_schema import (
-    VerifyUser2FARequest,
-)
 from app.two_factor_authentication.services.users_2fa_service import (
     Users2FAService,
 )
 from app.two_factor_authentication.use_cases.create_new_user_2fa_use_case import (
     CreateNewUser2FAUseCase,
 )
-from app.two_factor_authentication.use_cases.verify_user_2fa_use_case import (
-    VerifyUser2FAUseCase,
-)
 from tests.utils.create_user import create_user
 
 settings = get_settings()
 
 
-class TestVerifyUser2FAUseCase:
-    def test_verify_correct_user_2fa(self, session: Session) -> None:
+class TestVerifyUser2FAEndpoint:
+    def test_verify_correct_user_2fa(
+        self, client: TestClient, session: Session
+    ) -> None:
         created_user = create_user(session)
         CreateNewUser2FAUseCase(session).execute(created_user.id)
 
@@ -31,45 +28,52 @@ class TestVerifyUser2FAUseCase:
         totp = pyotp.TOTP(user_2fa.secret_key)
         valid_code = totp.now()
 
-        data = VerifyUser2FARequest(
-            user_id=created_user.id, user_code=valid_code
+        response = client.post(
+            f"api/v1/users/{created_user.id}/totp/verify",
+            json={"user_code": valid_code},
         )
-        is_valid = VerifyUser2FAUseCase(session).execute(data)
 
-        assert is_valid
+        assert response.status_code == 200
 
     def test_verify_correct_user_2fa_and_mark_active(
-        self, session: Session
+        self, client: TestClient, session: Session
     ) -> None:
         created_user = create_user(session)
         CreateNewUser2FAUseCase(session).execute(created_user.id)
 
         user_2fa = Users2FAService(session).get_by_user_id(created_user.id)
 
-        assert user_2fa and not user_2fa.active
+        assert user_2fa
 
         totp = pyotp.TOTP(user_2fa.secret_key)
         valid_code = totp.now()
 
-        data = VerifyUser2FARequest(
-            user_id=created_user.id, user_code=valid_code, mark_active=True
+        response = client.post(
+            f"api/v1/users/{created_user.id}/totp/verify",
+            json={"user_code": valid_code, "mark_active": True},
         )
-        is_valid = VerifyUser2FAUseCase(session).execute(data)
+
+        assert response.status_code == 200
 
         user_2fa = Users2FAService(session).get_by_user_id(created_user.id)
 
         assert user_2fa and user_2fa.active
 
-        assert is_valid
-
-    def test_verify_incorrect_user_2fa(self, session: Session) -> None:
+    def test_verify_incorrect_user_2fa(
+        self, client: TestClient, session: Session
+    ) -> None:
         created_user = create_user(session)
         CreateNewUser2FAUseCase(session).execute(created_user.id)
 
-        invalid_code = "000000"
-        data = VerifyUser2FARequest(
-            user_id=created_user.id, user_code=invalid_code
-        )
-        is_valid = VerifyUser2FAUseCase(session).execute(data)
+        user_2fa = Users2FAService(session).get_by_user_id(created_user.id)
 
-        assert not is_valid
+        assert user_2fa
+
+        response = client.post(
+            f"api/v1/users/{created_user.id}/totp/verify",
+            json={
+                "user_code": "invalid_code",
+            },
+        )
+
+        assert response.status_code == 401

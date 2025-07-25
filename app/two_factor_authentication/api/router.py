@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from app.auth.api import endpoints
+from app.two_factor_authentication.api import endpoints
 
 api_router = APIRouter()
 api_router.include_router(
-    endpoints.router, prefix="/users/{user_id}", tags=["users", "2fa"]
+    endpoints.router, prefix="/users/{user_id}/totp", tags=["totp"]
 )

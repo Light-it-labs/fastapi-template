@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, status
 from slowapi import Limiter
 
 from app.common.api.dependencies.get_session import SessionDependency
@@ -32,8 +32,7 @@ settings = get_settings()
 limiter = Limiter(key_func=get_remote_address)
 
 
-@router.post("/totp", status_code=status.HTTP_204_NO_CONTENT)
-@limiter.limit(settings.AUTHENTICATION_API_RATE_LIMIT)
+@router.post("", status_code=status.HTTP_200_OK)
 def create_new_user_2fa(
     session: SessionDependency, user_id: UUID
 ) -> User2FAResponse:
@@ -51,9 +50,10 @@ def create_new_user_2fa(
         )
 
 
+@router.post("/verify", status_code=status.HTTP_200_OK)
 def verify_user_2fa(
     session: SessionDependency, user_id: UUID, request: VerifyUser2FARequest
-) -> Response:
+) -> None:
     try:
         valid_2fa = VerifyUser2FAUseCase(session).execute(
             VerifyUser2FAData(user_id=user_id, **request.model_dump())
@@ -63,7 +63,6 @@ def verify_user_2fa(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid 2FA code provided.",
             )
-        return Response(status_code=status.HTTP_200_OK)
     except ModelNotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
