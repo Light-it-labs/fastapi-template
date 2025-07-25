@@ -22,7 +22,7 @@ settings = get_settings()
 class TestVerifyUser2FAUseCase:
     def test_verify_correct_user_2fa(self, session: Session) -> None:
         created_user = create_user(session)
-        CreateNewUser2FAUseCase(session).execute(created_user.email)
+        CreateNewUser2FAUseCase(session).execute(created_user.id)
 
         user_2fa = Users2FAService(session).get_by_user_id(created_user.id)
 
@@ -42,7 +42,7 @@ class TestVerifyUser2FAUseCase:
         self, session: Session
     ) -> None:
         created_user = create_user(session)
-        CreateNewUser2FAUseCase(session).execute(created_user.email)
+        CreateNewUser2FAUseCase(session).execute(created_user.id)
 
         user_2fa = Users2FAService(session).get_by_user_id(created_user.id)
 
@@ -64,7 +64,7 @@ class TestVerifyUser2FAUseCase:
 
     def test_verify_incorrect_user_2fa(self, session: Session) -> None:
         created_user = create_user(session)
-        CreateNewUser2FAUseCase(session).execute(created_user.email)
+        CreateNewUser2FAUseCase(session).execute(created_user.id)
 
         invalid_code = "000000"
         data = VerifyUser2FARequest(

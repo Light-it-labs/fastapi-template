@@ -16,7 +16,7 @@ settings = get_settings()
 class TestCreateNewUser2FAUseCase:
     def test_create_new_user_2fa(self, session: Session) -> None:
         created_user = create_user(session)
-        response = CreateNewUser2FAUseCase(session).execute(created_user.email)
+        response = CreateNewUser2FAUseCase(session).execute(created_user.id)
 
         user_2fa = Users2FAService(session).get_by_user_id(created_user.id)
 

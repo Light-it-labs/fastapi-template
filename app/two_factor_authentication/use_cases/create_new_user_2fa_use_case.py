@@ -1,4 +1,4 @@
-from pydantic import EmailStr
+from uuid import UUID
 from sqlalchemy.orm import Session
 import pyotp
 from app.common.exceptions.model_not_created_exception import (
@@ -27,10 +27,10 @@ class CreateNewUser2FAUseCase:
         self.users_service = UsersService(self.session, users_repository)
         self.users_2fa_service = Users2FAService(self.session)
 
-    def execute(self, user_email: EmailStr) -> User2FAResponse:
+    def execute(self, user_id: UUID) -> User2FAResponse:
         secret_key = pyotp.random_base32()
 
-        user = self.users_service.get_by_email(user_email)
+        user = self.users_service.get_by_id(user_id)
         if not user:
             raise ModelNotFoundException("User not found")
 
@@ -44,6 +44,6 @@ class CreateNewUser2FAUseCase:
             )
 
         provisioning_uri = pyotp.totp.TOTP(secret_key).provisioning_uri(
-            name=user_email, issuer_name=settings.PROJECT_NAME
+            name=user.email, issuer_name=settings.PROJECT_NAME
         )
         return User2FAResponse(provisioning_url=provisioning_uri)
