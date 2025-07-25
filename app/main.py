@@ -13,6 +13,9 @@ from starlette.middleware.cors import CORSMiddleware
 from uvicorn.protocols.utils import get_path_with_query_string
 
 from app.users.api.routers import api_router as users_router
+from app.two_factor_authentication.api.router import (
+    api_router as two_factor_authentication_router,
+)
 from app.auth.api.routers import api_router as auth_router
 from app.common.api.routers import api_router as common_router
 from app.celery.celery_settings import get_celery_settings
@@ -51,6 +54,9 @@ if settings.BACKEND_CORS_ORIGINS:
 app.include_router(users_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(common_router, prefix=settings.API_V1_STR)
+app.include_router(
+    two_factor_authentication_router, prefix=settings.API_V1_STR
+)
 
 
 @app.middleware("http")

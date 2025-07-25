@@ -1,3 +1,9 @@
 {
-  "cSpell.words": ["pydantic", "RABBITMQ"]
+  "cSpell.words": ["pydantic", "RABBITMQ", "totp"],
+  "[python]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4
+  },
+  "editor.rulers": [89],
+  "terminal.integrated.scrollback": 10000
 }
