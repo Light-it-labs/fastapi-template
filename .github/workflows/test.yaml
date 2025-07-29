@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [labeled]
     branches:
-      - '*'
+      - "*"
 
 jobs:
   test:
@@ -12,35 +12,30 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    container: python:3.12.2
 
     services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_SERVER: localhost
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test-db
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      test-db:
+          image: postgres:latest
+          env:
+            POSTGRES_USER: test
+            POSTGRES_PASSWORD: test
+            POSTGRES_DB: test-db
+          ports:
+            - 5432:5432
+          options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Cache Poetry packages
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pypoetry
           key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.12
 
       - name: Install Poetry
         run: |
@@ -53,10 +48,6 @@ jobs:
       - name: Install Dependencies
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
-
-      - name: Copy .env.test to .env
-        run: |
-          cp .env.test .env
 
       - name: Run pytest
         run: |
