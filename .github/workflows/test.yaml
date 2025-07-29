@@ -15,7 +15,7 @@ jobs:
     container: python:3.12.2
 
     services:
-      postgres:
+      test-db:
           image: postgres:latest
           env:
             POSTGRES_USER: test
@@ -48,10 +48,6 @@ jobs:
       - name: Install Dependencies
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
-
-      - name: Copy .env.test to .env
-        run: |
-          cp .env.test .env
 
       - name: Run pytest
         run: |
