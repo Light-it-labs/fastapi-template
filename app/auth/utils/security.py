@@ -7,7 +7,8 @@ from jwt import encode, decode
 from jwt.exceptions import PyJWTError
 from pydantic import ValidationError
 from app.auth.api.dependencies.get_token import TokenDep
-from app.auth.schemas.token_schema import TokenPayload
+from app.auth.enums.claims_enum import ClaimsEnum
+from app.auth.schemas.token_schema import EmailTokenPayload, TokenPayload
 from app.core.config import settings
 from app.auth.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
@@ -39,14 +40,20 @@ def get_password_hash(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
-def validate_token(token: TokenDep) -> TokenPayload:
+def validate_token(
+    token: TokenDep, claim: ClaimsEnum
+) -> TokenPayload | EmailTokenPayload:
     if not token:
         raise InvalidCredentialsException()
     try:
         payload = decode(
             token, settings.SECRET_KEY, algorithms=settings.ALGORITHM
         )
-        token_data = TokenPayload(**payload)
+        if claim == ClaimsEnum.USER_ID:
+            return TokenPayload(**payload)
+        elif claim == ClaimsEnum.USER_EMAIL:
+            return EmailTokenPayload(**payload)
+        else:
+            raise ValueError("Invalid token claim")
     except (PyJWTError, ValidationError):
         raise InvalidCredentialsException()
-    return token_data

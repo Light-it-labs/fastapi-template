@@ -1,7 +1,10 @@
-from fastapi import APIRouter, HTTPException, status, Response, Request
+from typing import Annotated
+from fastapi import APIRouter, HTTPException, Header, status, Response, Request
+from sqlalchemy.orm import Session
 
+from app.auth.use_cases.reset_password_use_case import ResetPasswordUseCase
 from app.common.api.dependencies.get_session import SessionDependency
-from app.auth.schemas.auth_schema import UserLogin
+from app.auth.schemas.auth_schema import PasswordResetRequest, UserLogin
 from app.auth.use_cases.auth_user_use_case import AuthUserUseCase
 from app.common.exceptions.model_not_found_exception import (
     ModelNotFoundException,
@@ -40,3 +43,19 @@ def login_access_token(
 @router.post("/logout")
 async def logout(response: Response) -> None:
     response.delete_cookie(key="access_token", httponly=True)
+
+
+@router.post("/reset-password", status_code=200)
+@limiter.limit(settings.AUTHENTICATION_API_RATE_LIMIT)
+def reset_password(
+    request: Request,
+    session: Session,
+    token: Annotated[str, Header()],
+    body: PasswordResetRequest,
+) -> None:
+    try:
+        ResetPasswordUseCase(session).execute(token, body.password)
+    except (InvalidCredentialsException, ModelNotFoundException) as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=e.message
+        )

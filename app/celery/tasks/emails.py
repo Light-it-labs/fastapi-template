@@ -8,7 +8,6 @@ from app.main import celery
 
 
 from app.core.config import get_settings
-from app.users.repositories.users_repository import users_repository
 from app.users.schemas.user_schema import UserInDB
 from app.users.services.users_service import UsersService
 
@@ -19,9 +18,7 @@ settings = get_settings()
 def send_reminder_email() -> None:
     session = SessionLocal()
     try:
-        users = UsersService(session, users_repository).list(
-            ListFilter(page=1, page_size=100)
-        )
+        users = UsersService(session).list(ListFilter(page=1, page_size=100))
         for user in users.data:
             EmailService(ExampleEmailClient()).send_user_remind_email(
                 UserInDB.model_validate(user)
@@ -39,7 +36,7 @@ def send_reminder_email() -> None:
 def send_welcome_email(user_id: UUID) -> None:
     session = SessionLocal()
     try:
-        user = UsersService(session, users_repository).get_by_id(user_id)
+        user = UsersService(session).get_by_id(user_id)
         if user:
             EmailService(ExampleEmailClient()).send_new_user_email(
                 UserInDB.model_validate(user)
