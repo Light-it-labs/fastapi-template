@@ -31,7 +31,7 @@ slowapi = "^0.1.9"
 celery = "^5.4.0"
 pyjwt = "^2.10.1"
 pyotp = "^2.9.0"
-psycopg2 = "^2.9.10"
+psycopg2-binary = "^2.9.10"
 
 
 [tool.poetry.group.dev.dependencies]
