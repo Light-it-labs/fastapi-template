@@ -45,11 +45,11 @@ async def logout(response: Response) -> None:
     response.delete_cookie(key="access_token", httponly=True)
 
 
-@router.post("/reset-password", status_code=200)
+@router.post("/reset-password", status_code=status.HTTP_204_NO_CONTENT)
 @limiter.limit(settings.AUTHENTICATION_API_RATE_LIMIT)
 def reset_password(
     request: Request,
-    session: Session,
+    session: SessionDependency,
     token: Annotated[str, Header()],
     body: PasswordResetRequest,
 ) -> None:

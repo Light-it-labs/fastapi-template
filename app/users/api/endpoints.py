@@ -23,7 +23,6 @@ def get_current_user(
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-@limiter.limit(settings.AUTHENTICATION_API_RATE_LIMIT)
 def create_user(
     session: SessionDependency,
     create_user_request: CreateUserRequest,
