@@ -8,3 +8,7 @@ class Token(BaseModel):
 # Contents of JWT token
 class TokenPayload(BaseModel):
     user_id: str
+
+
+class EmailTokenPayload(BaseModel):
+    user_email: str

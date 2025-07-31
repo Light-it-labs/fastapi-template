@@ -10,7 +10,6 @@ from app.two_factor_authentication.schemas.user_2fa_schema import (
 from app.two_factor_authentication.services.users_2fa_service import (
     Users2FAService,
 )
-from app.users.repositories.users_repository import users_repository
 from app.users.services.users_service import UsersService
 
 settings = get_settings()
@@ -19,7 +18,7 @@ settings = get_settings()
 class VerifyUser2FAUseCase:
     def __init__(self, session: Session):
         self.session = session
-        self.users_service = UsersService(self.session, users_repository)
+        self.users_service = UsersService(self.session)
         self.users_2fa_service = Users2FAService(self.session)
 
     def execute(self, data: VerifyUser2FAData) -> bool:
