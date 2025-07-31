@@ -29,7 +29,8 @@ class TestResetPasswordEndpoint:
         assert user and verify_password(new_password, user.hashed_password)
 
     def test_reset_password_invalid_token(
-        self, client: TestClient,
+        self,
+        client: TestClient,
     ) -> None:
         invalid_token = "this-is-not-a-valid-token"
         new_password = "MyNewSecurePassword123!"
@@ -44,7 +45,8 @@ class TestResetPasswordEndpoint:
         assert "Invalid credentials" in response.json()["detail"]
 
     def test_reset_password_invalid_password(
-        self, client: TestClient,
+        self,
+        client: TestClient,
     ) -> None:
         invalid_token = "this-is-not-a-valid-token"
         new_password = "invalidpassword"

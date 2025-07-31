@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Header, status, Response, Request
-from sqlalchemy.orm import Session
 
 from app.auth.use_cases.reset_password_use_case import ResetPasswordUseCase
 from app.common.api.dependencies.get_session import SessionDependency
