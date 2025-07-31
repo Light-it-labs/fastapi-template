@@ -39,7 +39,6 @@ class TestResetPasswordEndpoint:
             headers={"token": invalid_token},
             json={"password": new_password},
         )
-        print(response.json())
 
         assert response.status_code == 403
         assert "Invalid credentials" in response.json()["detail"]
