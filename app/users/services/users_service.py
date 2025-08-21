@@ -21,7 +21,7 @@ class UsersService:
         self.repository = repository
 
     def get_by_email(self, email: str) -> UserInDB | None:
-        user = self.repository.get_by_email(self.session, email)
+        user = self.repository.get_by_email(self.session, email.lower())
         if not user:
             return None
         return UserInDB.model_validate(user)
