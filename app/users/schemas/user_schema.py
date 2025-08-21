@@ -1,19 +1,23 @@
+from typing import Annotated
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+from app.users.constants.user_constants import USER_EMAIL_MAX_LENGTH
+
+_UserEmailField = Field(max_length=USER_EMAIL_MAX_LENGTH)
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    email: Annotated[EmailStr, _UserEmailField]
 
 
-class UserCreate(BaseModel):
-    email: EmailStr
+class UserCreate(UserBase):
     hashed_password: str
 
 
 class UserUpdate(BaseModel):
-    email: EmailStr | None = None
+    email: Annotated[EmailStr | None, _UserEmailField] = None
     hashed_password: str | None = None
 
 
@@ -26,8 +30,7 @@ class UserResponse(UserInDB):
     pass
 
 
-class CreateUserRequest(BaseModel):
-    email: EmailStr
+class CreateUserRequest(UserBase):
     password: str
 
 
