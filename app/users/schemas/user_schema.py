@@ -12,8 +12,7 @@ class UserBase(BaseModel):
     email: Annotated[EmailStr, _UserEmailField]
 
 
-class UserCreate(BaseModel):
-    email: Annotated[EmailStr, _UserEmailField]
+class UserCreate(UserBase):
     hashed_password: str
 
 
@@ -31,8 +30,7 @@ class UserResponse(UserInDB):
     pass
 
 
-class CreateUserRequest(BaseModel):
-    email: Annotated[EmailStr, _UserEmailField]
+class CreateUserRequest(UserBase):
     password: str
 
 

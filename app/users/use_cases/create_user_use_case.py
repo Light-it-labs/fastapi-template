@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from fastapi import status
 
 from app.auth.utils import security
-from app.users.repositories.users_repository import users_repository
 from app.users.schemas.user_schema import (
     CreateUserRequest,
     UserCreate,
@@ -19,7 +18,7 @@ class CreateUserUseCase:
     def execute(self, create_user_request: CreateUserRequest) -> UserResponse:
         from app.celery.tasks.emails import send_welcome_email
 
-        users_service = UsersService(self.session, users_repository)
+        users_service = UsersService(self.session)
         if users_service.get_by_email(create_user_request.email):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -28,7 +27,7 @@ class CreateUserUseCase:
 
         created_user = users_service.create_user(
             UserCreate(
-                email=create_user_request.email,
+                email=create_user_request.email.lower(),
                 hashed_password=security.get_password_hash(
                     create_user_request.password
                 ),
