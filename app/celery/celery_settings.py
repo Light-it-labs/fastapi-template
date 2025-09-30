@@ -7,7 +7,7 @@ settings = get_settings()
 
 def get_celery_settings() -> dict:
     return {
-        "broker_url": "sqs://",
+        "broker_url": settings.BROKER_URL,
         "result_backend": f"db+{settings.SQLALCHEMY_DATABASE_URI}",
         "imports": ("app.celery.tasks",),
         "include": ["app.celery.tasks.emails"],

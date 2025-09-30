@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
 
     # SQS
+    BROKER_URL: str = "sqs://"
     SQS_REGION: str = "us-east-1"
 
     # Logging
