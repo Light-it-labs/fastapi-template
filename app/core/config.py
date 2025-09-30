@@ -73,7 +73,6 @@ class Settings(BaseSettings):
         ).unicode_string()
 
 
-
 settings = Settings()
 
 
