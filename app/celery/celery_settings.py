@@ -7,13 +7,17 @@ settings = get_settings()
 
 def get_celery_settings() -> dict:
     return {
-        "broker_url": settings.rabbitmq_url,
+        "broker_url": "sqs://",
         "result_backend": f"db+{settings.SQLALCHEMY_DATABASE_URI}",
         "imports": ("app.celery.tasks",),
         "include": ["app.celery.tasks.emails"],
         "worker_max_tasks_per_child": 10,
         "broker_connection_retry_on_startup": True,
         "worker_send_task_events": True,
+        "broker_transport_options": {
+            "region": settings.SQS_REGION,
+            "polling_interval": 10,
+        },
         "beat_schedule": {
             "send_reminder_email": {
                 "task": "app.celery.tasks.emails.send_reminder_email",

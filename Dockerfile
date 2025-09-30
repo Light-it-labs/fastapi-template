@@ -7,6 +7,8 @@ ENV LANG=en_US.UTF-8 \
     BASE_DIR=/code \
     POETRY_VERSION=2.1
 
+RUN apt update && apt install -y curl
+
 RUN pip install psycopg2-binary
 
 WORKDIR $BASE_DIR
