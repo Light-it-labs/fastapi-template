@@ -10,7 +10,7 @@ echo "Creating SQS queue: celery"
 awslocal sqs create-queue --queue-name celery
 
 echo "Verifying SES email identity: test@test.com"
-awslocal ses verify-email-identity --email-address test@test.com --region us-east-1
+awslocal ses verify-email-identity --email-address test@test.com --region ${SQS_REGION:-us-east-1}
 
 echo "LocalStack initialization completed successfully!"
 echo "- SQS queue 'celery' created"
