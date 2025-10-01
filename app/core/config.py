@@ -33,7 +33,8 @@ class Settings(BaseSettings):
 
     # SQS
     BROKER_URL: str = "sqs://"
-    SQS_REGION: str = "us-east-1"
+    SQS_REGION: str | None = None
+    SQS_POLLING_INTERVAL: int | None = None
 
     # Logging
     LOG_JSON_FORMAT: bool = False
