@@ -38,6 +38,24 @@ def get_url():
     return settings.SQLALCHEMY_DATABASE_URI
 
 
+# table exclusion logic
+exclude_tables = [
+    "celery_taskmeta",
+    "celery_tasksetmeta",
+]
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    """
+    Exclude tables from auto_generate
+    """
+    if type_ == "table" and name in exclude_tables:
+        return False
+
+    return True
+
+
+# migration functions
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -55,6 +73,7 @@ def run_migrations_offline():
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        include_object=include_object,
         compare_type=True,
     )
 
@@ -81,6 +100,7 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
+            include_object=include_object,
             compare_type=True,
         )
 
