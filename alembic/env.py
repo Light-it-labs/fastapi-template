@@ -2,6 +2,7 @@ from __future__ import with_statement
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlalchemy.sql.schema import SchemaItem
 from logging.config import fileConfig
 
 from app.core.config import get_settings
@@ -34,18 +35,24 @@ settings = get_settings()
 # ... etc.
 
 
-def get_url():
+def get_url() -> str:
     return settings.SQLALCHEMY_DATABASE_URI
 
 
 # table exclusion logic
-exclude_tables = [
+exclude_tables = {
     "celery_taskmeta",
     "celery_tasksetmeta",
-]
+}
 
 
-def include_object(object, name, type_, reflected, compare_to):
+def include_object(
+    sqla_object: SchemaItem,
+    name: str | None,
+    type_: str,
+    reflected: bool,
+    compare_to: SchemaItem | None,
+) -> bool:
     """
     Exclude tables from auto_generate
     """
@@ -56,7 +63,7 @@ def include_object(object, name, type_, reflected, compare_to):
 
 
 # migration functions
-def run_migrations_offline():
+def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -81,7 +88,7 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def run_migrations_online():
+def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
