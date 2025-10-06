@@ -56,10 +56,7 @@ def include_object(
     """
     Exclude tables from auto_generate
     """
-    if type_ == "table" and name in exclude_tables:
-        return False
-
-    return True
+    return not (type_ == "table" and name in exclude_tables)
 
 
 # migration functions
