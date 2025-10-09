@@ -1,7 +1,7 @@
 import logging
 import secrets
 from functools import lru_cache
-from typing import List, Optional, Union
+from typing import Any, Final, List, Optional, Union
 
 from pydantic import AnyHttpUrl, PostgresDsn, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -10,7 +10,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        case_sensitive=True, env_file=".env", env_file_encoding="utf-8"
+        case_sensitive=True,
+        env_file=".env",
+        env_file_encoding="utf-8",
+        frozen=True,
     )
     # APP
     RUN_ENV: str = "local"
@@ -63,7 +66,7 @@ class Settings(BaseSettings):
 
     @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
     @classmethod
-    def assemble_db_uri(cls, field_value, info: ValidationInfo) -> str:
+    def assemble_db_uri(cls, field_value: Any, info: ValidationInfo) -> str:
         if isinstance(field_value, str):
             return field_value
         return PostgresDsn.build(
@@ -81,9 +84,9 @@ class Settings(BaseSettings):
         return f"amqp://{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD}@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}//"
 
 
-settings = Settings()
+settings: Final = Settings()
 
 
 @lru_cache()
-def get_settings():
+def get_settings() -> Settings:
     return settings
