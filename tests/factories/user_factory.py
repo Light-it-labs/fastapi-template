@@ -1,17 +1,17 @@
-from typing import Sequence
+from typing import Any, Sequence
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session
 
 from app.auth.utils import security
-from app.users.models.user import User
-from app.users.services.users_service import UsersService
+from app.two_factor_authentication.use_cases import CreateNewUser2FAUseCase
+from app.users.models import User
 
 
 class UserFactory:
     def __init__(self, session: Session):
         self.session = session
-        self.service = UsersService(session)
+        self._create_2fa = CreateNewUser2FAUseCase(session).execute
 
     def create(
         self,
@@ -19,6 +19,7 @@ class UserFactory:
         id: UUID | None = None,
         email: str = "test@user.com",
         password: str = "password",
+        with_2fa: bool = False,
     ) -> User:
         if id is None:
             id = uuid4()
@@ -31,6 +32,13 @@ class UserFactory:
 
         self.session.add(user)
         self.session.flush()
+
+        if with_2fa:
+            self._create_2fa(user.id)
+
+        self.session.refresh(
+            user, attribute_names=("two_factor_authentications",)
+        )
         return user
 
     def create_many(
@@ -41,6 +49,7 @@ class UserFactory:
         ids: Sequence[UUID] | None,
         emails: Sequence[str] | None = None,
         passwords: Sequence[str] | None = None,
+        **kw: Any,
     ) -> list[User]:
         assert amount > 1, "Amount must be greater than 1"
 
@@ -64,7 +73,7 @@ class UserFactory:
             passwords = ["password" for _ in range(amount)]
 
         users = [
-            self.create(id=id, email=email, password=password)
+            self.create(id=id, email=email, password=password, **kw)
             for id, email, password in zip(ids, emails, passwords, strict=True)
         ]
 

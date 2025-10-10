@@ -1,15 +1,18 @@
 from typing import Generator
+
+from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy import RootTransaction, event
-from fastapi.testclient import TestClient
-
-from app.common.api.dependencies.get_session import get_session
-from app.core.config import get_settings
-from app.db.session import engine, SessionLocal
-from app.main import app
 from sqlalchemy.orm import Session
 
-settings = get_settings()
+from app.common.api.dependencies.get_session import get_session
+from app.core.config import settings
+from app.db.session import engine, SessionLocal
+from app.main import app
+
+from tests.factories import UserFactory
+
+
 TEST_DATABASE_URI = settings.SQLALCHEMY_DATABASE_URI
 
 
@@ -48,3 +51,8 @@ def client(session: Session) -> Generator:
 
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture()
+def user_factory(session: Session) -> UserFactory:
+    return UserFactory(session)
