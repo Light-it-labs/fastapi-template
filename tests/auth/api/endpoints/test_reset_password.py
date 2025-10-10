@@ -3,17 +3,17 @@ from sqlalchemy.orm import Session
 
 from app.auth.schemas.token_schema import EmailTokenPayload
 from app.auth.utils.security import create_access_token, verify_password
-from app.users.models.user import User
-from tests.utils.create_user import create_user
+
+from tests.factories import UserFactory
 
 
 class TestResetPasswordEndpoint:
     def test_reset_password_success(
-        self, client: TestClient, session: Session
+        self, client: TestClient, user_factory: UserFactory, session: Session
     ) -> None:
-        created_user = create_user(session)
+        user = user_factory.create()
         reset_token = create_access_token(
-            EmailTokenPayload(user_email=created_user.email)
+            EmailTokenPayload(user_email=user.email)
         )
         new_password = "MyNewSecurePassword123!"
 
@@ -25,8 +25,8 @@ class TestResetPasswordEndpoint:
 
         assert response.status_code == 204
 
-        user = session.query(User).filter(User.id == created_user.id).first()
-        assert user and verify_password(new_password, user.hashed_password)
+        session.refresh(user)
+        assert verify_password(new_password, user.hashed_password)
 
     def test_reset_password_invalid_token(
         self,
