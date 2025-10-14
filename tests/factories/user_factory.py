@@ -1,6 +1,8 @@
-from typing import Any, Sequence
-from uuid import UUID, uuid4
+from datetime import datetime
+from typing import Any, Iterable, Sequence
+from uuid import UUID
 
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.auth.utils import security
@@ -9,72 +11,113 @@ from app.users.models import User
 
 
 class UserFactory:
+    class _UserConfig(BaseModel):
+        id: UUID | None = None
+        created_at: datetime | None = None
+        email: str = "test@user.com"
+        password: str = "password"
+        with_2fa: bool = False
+
+    @property
+    def config(self) -> type[_UserConfig]:
+        return self.__class__._UserConfig
+
     def __init__(self, session: Session):
         self.session = session
-        self._create_2fa = CreateNewUser2FAUseCase(session).execute
+        self._create_2fa_use_case = CreateNewUser2FAUseCase(session)
 
     def create(
         self,
-        *,
-        id: UUID | None = None,
-        email: str = "test@user.com",
-        password: str = "password",
-        with_2fa: bool = False,
+        config: _UserConfig | None = None,
+        /,
+        **kw: Any,
     ) -> User:
-        if id is None:
-            id = uuid4()
+        if config is None:
+            config = self.config(**kw)
 
-        user = User(
-            id=id,
-            email=email,
-            hashed_password=security.get_password_hash(password),
-        )
-
+        user = self._create_model(config)
         self.session.add(user)
         self.session.flush()
 
-        if with_2fa:
-            self._create_2fa(user.id)
+        if config.with_2fa:
+            self._create_2fa(user)
 
-        self.session.refresh(
-            user, attribute_names=("two_factor_authentications",)
-        )
         return user
 
     def create_many(
         self,
         amount: int,
+        /,
         *,
-        email_base: str = "test@user.com",
-        ids: Sequence[UUID] | None,
-        emails: Sequence[str] | None = None,
-        passwords: Sequence[str] | None = None,
+        email_base: str = "test@mail.com",
+        configurations: Sequence[_UserConfig] | None = None,
         **kw: Any,
     ) -> list[User]:
         assert amount > 1, "Amount must be greater than 1"
+        assert email_base.count("@") == 1, (
+            "`email_base` must contain exactly one `@`"
+        )
 
-        if ids is not None:
-            assert len(ids) == amount, "Wrong number of ids"
-        else:
-            ids = [uuid4() for _ in range(amount)]
+        configurations = self._parse_configurations(
+            amount, email_base, configurations, kw
+        )
 
-        if emails is not None:
-            assert len(emails) == amount, "Wrong number of emails"
-        else:
-            assert email_base.count("@") == 1, (
-                "`email_base` must contain one `@`"
-            )
-            address, domain = email_base.split("@")
-            emails = [f"{address}{i}@{domain}" for i in range(amount)]
+        users = [self._create_model(config) for config in configurations]
 
-        if passwords is not None:
-            assert len(passwords) == amount, "Wrong number of passwords"
-        else:
-            passwords = ["password" for _ in range(amount)]
+        self.session.add_all(users)
+        self.session.flush()
 
-        users = [
-            self.create(id=id, email=email, password=password, **kw)
-            for id, email, password in zip(ids, emails, passwords, strict=True)
-        ]
+        self._create_2fa(
+            user
+            for user, config in zip(users, configurations, strict=True)
+            if config.with_2fa
+        )
 
         return users
+
+    def _create_model(self, config: _UserConfig, /) -> User:
+        user = User(
+            email=config.email,
+            hashed_password=security.get_password_hash(config.password),
+        )
+
+        if config.id:
+            user.id = config.id
+
+        if config.created_at:
+            user.created_at = config.created_at
+
+        return user
+
+    def _create_2fa(self, users: User | Iterable[User], /) -> None:
+        if isinstance(users, User):
+            users = [users]
+
+        for user in users:
+            self._create_2fa_use_case.execute(user.id)
+            self.session.refresh(
+                user, attribute_names=("two_factor_authentications",)
+            )
+
+    def _parse_configurations(
+        self,
+        amount: int,
+        email_base: str,
+        configurations: Sequence[_UserConfig] | None,
+        kw: dict[str, Any],
+    ) -> list[_UserConfig]:
+        address, domain = email_base.split("@")
+
+        parsed_configurations = []
+        for i in range(amount):
+            if configurations is None or len(configurations) <= i:
+                config = self.config(**kw)
+            else:
+                config = configurations[i]
+
+            if "email" not in config.model_fields_set:
+                config.email = f"{address}{i}@{domain}"
+
+            parsed_configurations.append(config)
+
+        return parsed_configurations
