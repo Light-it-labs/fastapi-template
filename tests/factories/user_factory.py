@@ -98,6 +98,9 @@ class UserFactory:
             self.session.refresh(
                 user, attribute_names=("two_factor_authentications",)
             )
+            assert len(user.two_factor_authentications) == 1, (
+                "UserFactory failed to create user 2fa"
+            )
 
     def _parse_configurations(
         self,

@@ -20,7 +20,7 @@ class TestVerifyUser2FAEndpoint:
         user_factory: UserFactory,
     ) -> None:
         user = user_factory.create(with_2fa=True)
-        assert (user_2fa := user.two_factor_authentications[0])
+        user_2fa = user.two_factor_authentications[0]
 
         totp = pyotp.TOTP(user_2fa.secret_key)
         valid_code = totp.now()
@@ -35,7 +35,7 @@ class TestVerifyUser2FAEndpoint:
         user_factory: UserFactory,
     ) -> None:
         user = user_factory.create(with_2fa=True)
-        assert (user_2fa := user.two_factor_authentications[0])
+        user_2fa = user.two_factor_authentications[0]
 
         totp = pyotp.TOTP(user_2fa.secret_key)
         valid_code = totp.now()
