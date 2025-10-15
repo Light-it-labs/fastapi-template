@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 from celery import Celery
 import structlog
+import sentry_sdk
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
 from fastapi import FastAPI, Request, Response, status
@@ -23,6 +24,13 @@ from app.core.config import get_settings
 from app.custom_logging import setup_logging
 
 settings = get_settings()
+
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.RUN_ENV,
+        send_default_pii=True,
+    )
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
