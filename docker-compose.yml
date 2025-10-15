@@ -32,6 +32,11 @@ services:
     container_name: app-api
     env_file:
       - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-http://localstack:4566}
     ports:
       - ${API_PORT:-8000}:8000
     volumes:
@@ -44,9 +49,15 @@ services:
     entrypoint:
       - app/celery/start-celery-worker.sh
     depends_on:
-      - rabbitmq
+      localstack:
+        condition: service_healthy
     env_file:
       - .env
+    environment:
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-http://localstack:4566}
     ports:
       - "6379:6379"
     volumes:
@@ -59,30 +70,35 @@ services:
     entrypoint:
       - app/celery/start-celery-beat.sh
     depends_on:
-      - rabbitmq
+      localstack:
+        condition: service_healthy
     env_file:
       - .env
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-http://localstack:4566}
     ports:
       - "6479:6479"
     volumes:
       - ./:/code/
 
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:latest
+  localstack:
+    container_name: localstack-main
+    image: localstack/localstack
     ports:
-      - 5672:5672
-      - 15672:15672
+      - 4566:4566
     environment:
-      RABBITMQ_DEFAULT_USER: "root"
-      RABBITMQ_DEFAULT_PASS: "rabbitmq-password"
+      - SERVICES=ses,sqs
     volumes:
-      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - localstack-data:/var/lib/localstack
+      - ./scripts/init-localstack.sh:/etc/localstack/init/ready.d/init-localstack.sh
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
 volumes:
   app-db-data:
+  localstack-data:

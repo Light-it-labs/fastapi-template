@@ -1,4 +1,5 @@
 import time
+from typing import Any
 from urllib.parse import urlparse
 
 from celery import Celery
@@ -6,24 +7,29 @@ import structlog
 import sentry_sdk
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
+from celery import Celery
 from fastapi import FastAPI, Request, Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
+import structlog
 from uvicorn.protocols.utils import get_path_with_query_string
 
-from app.users.api.routers import api_router as users_router
-from app.two_factor_authentication.api.router import (
-    api_router as two_factor_authentication_router,
-)
-from app.auth.api.routers import api_router as auth_router
-from app.common.api.routers import api_router as common_router
+
+# NOTE: Unconventional import order is needed to control boot up flow
+# region Configuration
+from app.core.config import settings
 from app.celery.celery_settings import get_celery_settings
-from app.core.config import get_settings
+
+celery_settings = get_celery_settings()
+
+
+# region Logging
 from app.custom_logging import setup_logging
 
-settings = get_settings()
+setup_logging(json_logs=settings.LOG_JSON_FORMAT, log_level=settings.LOG_LEVEL)
+access_logger = structlog.stdlib.get_logger("api.access")
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(
@@ -32,22 +38,26 @@ if settings.SENTRY_DSN:
         send_default_pii=True,
     )
 
+
+# region Instances
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
 
-setup_logging(json_logs=settings.LOG_JSON_FORMAT, log_level=settings.LOG_LEVEL)
-
-access_logger = structlog.stdlib.get_logger("api.access")
-
 celery = Celery(
     settings.SERVER_NAME,
 )
-celery_settings = get_celery_settings()
 celery.config_from_object(celery_settings)
 
-# Set all CORS enabled origins
+
+# region Middleware
+if settings.RUN_ENV == "local":
+    from sqlalchemy.orm import relationship
+
+    relationship.__kwdefaults__["lazy"] = "raise"
+
+
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
@@ -59,16 +69,9 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
-app.include_router(users_router, prefix=settings.API_V1_STR)
-app.include_router(auth_router, prefix=settings.API_V1_STR)
-app.include_router(common_router, prefix=settings.API_V1_STR)
-app.include_router(
-    two_factor_authentication_router, prefix=settings.API_V1_STR
-)
-
 
 @app.middleware("http")
-async def logging_middleware(request: Request, call_next) -> Response:
+async def logging_middleware(request: Request, call_next: Any) -> Response:
     structlog.contextvars.clear_contextvars()
     request_id = correlation_id.get()
     structlog.contextvars.bind_contextvars(request_id=request_id)
@@ -118,18 +121,11 @@ async def logging_middleware(request: Request, call_next) -> Response:
 app.add_middleware(CorrelationIdMiddleware)
 
 
-def filter_transactions(event, hint):
-    url_string = event["request"]["url"]
-    parsed_url = urlparse(url_string)
-    if parsed_url.path == "/api/v1/health":
-        return None
-    return event
-
-
+# region Exceptions
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
-):
+) -> JSONResponse:
     modified_details = []
     details = exc.errors()
     for error in details:
@@ -144,3 +140,22 @@ async def validation_exception_handler(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder({"detail": modified_details}),
     )
+
+
+# region Routers
+# NOTE: its important to import routers last as this action
+#       triggers import of the use case layer all the way down
+#       to the model definitions.
+from app.users.api.routers import api_router as users_router
+from app.two_factor_authentication.api.router import (
+    api_router as two_factor_authentication_router,
+)
+from app.auth.api.routers import api_router as auth_router
+from app.common.api.routers import api_router as common_router
+
+app.include_router(users_router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(common_router, prefix=settings.API_V1_STR)
+app.include_router(
+    two_factor_authentication_router, prefix=settings.API_V1_STR
+)
