@@ -2,8 +2,6 @@ import time
 from typing import Any
 from urllib.parse import urlparse
 
-from celery import Celery
-import structlog
 import sentry_sdk
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
