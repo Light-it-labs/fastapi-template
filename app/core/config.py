@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     SEND_WELCOME_EMAIL_MAX_RETRIES: int = 5
     SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: int = 5
     FORWARD_MAILPIT_PORT: int = 1025
+    FORWARD_MAILPIT_DASHBOARD_PORT: int = 8025
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
