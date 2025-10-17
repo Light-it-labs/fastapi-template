@@ -1,8 +1,8 @@
 from uuid import UUID
-from app.common.clients.example_email_client import ExampleEmailClient
-from app.common.exceptions.email_client_exception import EmailClientException
+from app.emails.clients.example_email_client import ExampleEmailClient
+from app.emails.exceptions.email_client_exception import EmailClientException
 from app.common.schemas.pagination_schema import ListFilter
-from app.common.services.emails_service import EmailService
+from app.emails.services.emails_service import EmailService
 from app.db.session import SessionLocal
 from app.main import celery
 

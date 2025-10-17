@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from app.common.clients.base_email_client import BaseEmailClient
+from .base_email_client import BaseEmailClient
 
 
 logging.basicConfig(level=logging.INFO)

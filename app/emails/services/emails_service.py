@@ -2,13 +2,13 @@ from enum import Enum
 from string import Template
 
 
-from app.common.clients.base_email_client import BaseEmailClient
+from app.emails.clients.base_email_client import BaseEmailClient
 from app.core.config import settings
 from app.users.schemas.user_schema import UserInDB
 
 
 class Paths(Enum):
-    NEW_USER = "app/common/email_templates/welcome_email.html"
+    NEW_USER = "app/emails/templates/welcome_email.html"
 
 
 class EmailService:
