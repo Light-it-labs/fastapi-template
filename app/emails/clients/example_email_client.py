@@ -15,4 +15,4 @@ class ExampleEmailClient(BaseEmailClient):
         html_message: str,
     ) -> None:
         # If fails, should raise an ExternalProviderException
-        logger.info("Sending email.")
+        logger.info("Sending email from example.")

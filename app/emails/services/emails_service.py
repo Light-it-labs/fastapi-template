@@ -2,9 +2,9 @@ from enum import Enum
 from string import Template
 
 
-from app.emails.clients.base_email_client import BaseEmailClient
 from app.core.config import settings
 from app.users.schemas.user_schema import UserInDB
+from app.emails import BaseEmailClient, get_client
 
 
 class Paths(Enum):
@@ -21,8 +21,8 @@ class EmailService:
         "${html_message}"
     )
 
-    def __init__(self, email_client: BaseEmailClient):
-        self.email_client = email_client
+    def __init__(self, email_client: BaseEmailClient | None = None):
+        self.email_client = email_client or get_client()
 
     def _get_email_body(
         self,

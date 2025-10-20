@@ -1,5 +1,4 @@
 from uuid import UUID
-from app.emails.clients.example_email_client import ExampleEmailClient
 from app.emails.exceptions.email_client_exception import EmailClientException
 from app.common.schemas.pagination_schema import ListFilter
 from app.emails.services.emails_service import EmailService
@@ -20,7 +19,7 @@ def send_reminder_email() -> None:
     try:
         users = UsersService(session).list(ListFilter(page=1, page_size=100))
         for user in users.data:
-            EmailService(ExampleEmailClient()).send_user_remind_email(
+            EmailService().send_user_remind_email(
                 UserInDB.model_validate(user)
             )
     finally:
@@ -38,8 +37,6 @@ def send_welcome_email(user_id: UUID) -> None:
     try:
         user = UsersService(session).get_by_id(user_id)
         if user:
-            EmailService(ExampleEmailClient()).send_new_user_email(
-                UserInDB.model_validate(user)
-            )
+            EmailService().send_new_user_email(UserInDB.model_validate(user))
     finally:
         session.close()

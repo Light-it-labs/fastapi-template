@@ -1,1 +1,2 @@
 from .email_client_exception import EmailClientException
+from .global_email_client_not_set_exception import GlobalEmailClientNotSetException
