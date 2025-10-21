@@ -51,8 +51,21 @@ class Settings(BaseSettings):
     SENDER_EMAIL: str = "test@test.com"
     SEND_WELCOME_EMAIL_MAX_RETRIES: int = 5
     SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: int = 5
+
+    # Mailpit
+    MAILPIT_URI: str | None = None
+    MAILPIT_REQUEST_TIMEOUT_IN_SECONDS: int = 1
     FORWARD_MAILPIT_PORT: int = 1025
     FORWARD_MAILPIT_DASHBOARD_PORT: int = 8025
+
+    @field_validator("MAILPIT_URI", mode="before")
+    @classmethod
+    def assemble_mailpit_uri(cls, val: Any, info: ValidationInfo) -> str:
+        if isinstance(val, str):
+            return val
+        port = info.data.get("FORWARD_MAILPIT_DASHBOARD_PORT")
+        uri = f"http://mailpit:{port}/api/v1"
+        return uri
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

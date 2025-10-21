@@ -1,6 +1,5 @@
 import requests
 
-from app.core.config import settings
 from app.common.exceptions import ExternalProviderException
 
 from app.emails.exceptions import EmailClientException
@@ -10,20 +9,21 @@ from ._mailpit_email_schema import _EmailSchema, _Recipient
 
 
 class MailpitEmailClient(BaseEmailClient):
-    _request_timeout_in_seconds: int | None
     _mailpit_send_email_endpoint: str
+    _from_email: str
+    _request_timeout_in_seconds: int | None
 
     def __init__(
         self,
-        request_timeout_in_seconds: int | None = 1,
-        mailpit_send_email_url: str | None = None,
+        *,
+        mailpit_uri: str,
+        from_email: str,
+        timeout_in_seconds: int | None = None,
     ) -> None:
         super().__init__()
-        self._request_timeout_in_seconds = request_timeout_in_seconds
-        self._mailpit_send_email_endpoint = (
-            mailpit_send_email_url
-            or f"http://mailpit:{settings.FORWARD_MAILPIT_DASHBOARD_PORT}/api/v1/send"
-        )
+        self._mailpit_send_email_endpoint = f"{mailpit_uri}/send"
+        self._from_email = from_email
+        self._request_timeout_in_seconds = timeout_in_seconds
 
     def send_email(
         self,
@@ -32,7 +32,7 @@ class MailpitEmailClient(BaseEmailClient):
     ) -> None:
         email_schema = _EmailSchema(
             To=[_Recipient(Email=email) for email in to_emails],
-            From=_Recipient(Email=settings.SENDER_EMAIL),
+            From=_Recipient(Email=self._from_email),
             HTML=html_message,
         )
 
