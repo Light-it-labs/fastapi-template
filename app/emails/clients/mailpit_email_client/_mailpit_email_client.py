@@ -1,45 +1,38 @@
 import requests
 
 from app.common.exceptions import ExternalProviderException
-
+from app.emails.interfaces.base_email_client import BaseEmailClient
+from app.emails.schema.email import Email
 from app.emails.exceptions import EmailClientException
 
-from ..base_email_client import BaseEmailClient
-from ._mailpit_email_schema import _EmailSchema, _Recipient
+from ._mailpit_email_schema import _MailpitEmailSchema
 
 
 class MailpitEmailClient(BaseEmailClient):
     _mailpit_send_email_endpoint: str
-    _from_email: str
     _request_timeout_in_seconds: int | None
 
     def __init__(
         self,
         *,
         mailpit_uri: str,
-        from_email: str,
         timeout_in_seconds: int | None = None,
     ) -> None:
         super().__init__()
         self._mailpit_send_email_endpoint = f"{mailpit_uri}/send"
-        self._from_email = from_email
         self._request_timeout_in_seconds = timeout_in_seconds
 
     def send_email(
         self,
-        to_emails: list[str],
-        html_message: str,
+        /,
+        email: Email,
     ) -> None:
-        email_schema = _EmailSchema(
-            To=[_Recipient(Email=email) for email in to_emails],
-            From=_Recipient(Email=self._from_email),
-            HTML=html_message,
-        )
+        schema = _MailpitEmailSchema.from_email(email)
 
         try:
             response = requests.post(
                 self._mailpit_send_email_endpoint,
-                json=email_schema.model_dump(exclude_unset=True),
+                json=schema.model_dump(exclude_unset=True),
                 timeout=self._request_timeout_in_seconds,
             )
         except requests.exceptions.Timeout as exc:

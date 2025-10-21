@@ -1,10 +1,10 @@
 from enum import Enum
 from string import Template
 
-
-from app.core.config import settings
 from app.users.schemas.user_schema import UserInDB
-from app.emails import BaseEmailClient, get_client
+from app.emails.interfaces.base_email_client import BaseEmailClient
+from app.emails.schema.email import Email
+from app.emails._global_state import get_client
 
 
 class Paths(Enum):
@@ -12,63 +12,48 @@ class Paths(Enum):
 
 
 class EmailService:
-    email_template = Template(
-        "Subject: ${subject}\n"
-        "From: FastApi <${sender_email}>\n"
-        "To: <${recipient_email}>\n"
-        "MIME-Version: 1.0\n"
-        "Content-Type: text/html\n\n"
-        "${html_message}"
-    )
-
     def __init__(self, email_client: BaseEmailClient | None = None):
         self.email_client = email_client or get_client()
 
-    def _get_email_body(
+    def _get_email(
         self,
+        recipient_email: str,
         template: str,
         subject: str,
-        html_message_input: dict,
-        recipient_email: str,
-    ) -> str:
+        html_message_input: dict | None = None,
+    ) -> Email:
         with open(template, "r") as file:
             html_template_string = file.read()
 
-        html_message = Template(html_template_string).substitute(
-            **html_message_input
-        )
+        html_message_input = html_message_input or {}
+        html = Template(html_template_string).substitute(**html_message_input)
 
-        return self.email_template.substitute(
+        return Email(
+            to_emails=[recipient_email],
             subject=subject,
-            html_message=html_message,
-            sender_email=settings.SENDER_EMAIL,
-            recipient_email=recipient_email,
+            html=html,
         )
 
     def send_new_user_email(
         self,
         user: UserInDB,
     ) -> None:
-        return self.email_client.send_email(
-            to_emails=[user.email],
-            html_message=self._get_email_body(
-                Paths.NEW_USER.value,
-                "Welcome",
-                {},
-                user.email,
-            ),
+        email = self._get_email(
+            user.email,
+            Paths.NEW_USER.value,
+            "Welcome",
         )
+
+        return self.email_client.send_email(email)
 
     def send_user_remind_email(
         self,
         user: UserInDB,
     ) -> None:
-        return self.email_client.send_email(
-            to_emails=[user.email],
-            html_message=self._get_email_body(
-                Paths.NEW_USER.value,
-                "Welcome",
-                {},
-                user.email,
-            ),
+        email = self._get_email(
+            user.email,
+            Paths.NEW_USER.value,
+            "Welcome",
         )
+
+        return self.email_client.send_email(email)

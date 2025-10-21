@@ -46,7 +46,6 @@ from app import emails
 if settings.RUN_ENV == "local":
     email_client = emails.MailpitEmailClient(
         mailpit_uri=settings.MAILPIT_URI,
-        from_email=settings.SENDER_EMAIL,
         timeout_in_seconds=settings.MAILPIT_REQUEST_TIMEOUT_IN_SECONDS,
     )
 else:

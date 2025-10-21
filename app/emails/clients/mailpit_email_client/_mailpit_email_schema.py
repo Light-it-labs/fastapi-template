@@ -2,6 +2,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.emails.schema.email import Email
+
 
 class _Recipient(BaseModel):
     """
@@ -40,7 +42,7 @@ class _Attachment(BaseModel):
     ] = None
 
 
-class _EmailSchema(BaseModel):
+class _MailpitEmailSchema(BaseModel):
     """
     Defines the JSON schema for sending an email via Mailpit.
     """
@@ -84,3 +86,29 @@ class _EmailSchema(BaseModel):
         list[str] | None,
         Field(description="Optional Mailpit tags for categorization."),
     ] = None
+
+    @classmethod
+    def from_email(cls, email: Email) -> "_MailpitEmailSchema":
+        if email.headers:
+            sanitized_headers = email.headers.copy()
+            for mailpit_forbidden_header in (
+                "MIME-Version",
+                "Content-Type",
+            ):
+                if mailpit_forbidden_header in sanitized_headers:
+                    del sanitized_headers[mailpit_forbidden_header]
+        else:
+            sanitized_headers = None
+
+        return cls(
+            From=_Recipient(
+                Email=email.from_email,
+                Name=email.from_name,
+            ),
+            To=[_Recipient(Email=to_email) for to_email in email.to_emails],
+            Cc=[_Recipient(Email=to_email) for to_email in email.cc_emails],
+            Bcc=[_Recipient(Email=to_email) for to_email in email.bcc_emails],
+            Subject=email.subject,
+            Headers=sanitized_headers,
+            HTML=email.html,
+        )
