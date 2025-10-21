@@ -3,7 +3,7 @@ import secrets
 from functools import lru_cache
 from typing import Any, Final, List, Optional, Union
 
-from pydantic import AnyHttpUrl, PostgresDsn, field_validator
+from pydantic import AnyHttpUrl, PostgresDsn, field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -58,14 +58,21 @@ class Settings(BaseSettings):
     FORWARD_MAILPIT_PORT: int = 1025
     FORWARD_MAILPIT_DASHBOARD_PORT: int = 8025
 
-    @field_validator("MAILPIT_URI", mode="before")
+    @model_validator(mode="before")
     @classmethod
-    def assemble_mailpit_uri(cls, val: Any, info: ValidationInfo) -> str:
-        if isinstance(val, str):
-            return val
-        port = info.data.get("FORWARD_MAILPIT_DASHBOARD_PORT")
-        uri = f"http://mailpit:{port}/api/v1"
-        return uri
+    def assemble_mailpit_uri(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+
+        if data.get("MAILPIT_URI") is None:
+            port = data.get(
+                "FORWARD_MAILPIT_DASHBOARD_PORT",
+                cls.model_fields["FORWARD_MAILPIT_DASHBOARD_PORT"].default,
+            )
+
+            data["MAILPIT_URI"] = f"http://mailpit:{port}/api/v1"
+
+        return data
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
