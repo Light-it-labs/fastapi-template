@@ -2,6 +2,7 @@ import time
 from typing import Any
 from urllib.parse import urlparse
 
+import sentry_sdk
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
 from celery import Celery
@@ -27,6 +28,13 @@ from app.custom_logging import setup_logging
 
 setup_logging(json_logs=settings.LOG_JSON_FORMAT, log_level=settings.LOG_LEVEL)
 access_logger = structlog.stdlib.get_logger("api.access")
+
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.RUN_ENV,
+        send_default_pii=True,
+    )
 
 
 # region Instances
