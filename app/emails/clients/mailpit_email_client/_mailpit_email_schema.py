@@ -4,26 +4,14 @@ from app.emails.schema.email import Email
 
 
 class _Recipient(BaseModel):
-    """
-    Represents an email recipient with an email and an optional name.
-    Used for 'From', 'To', 'Cc', and 'ReplyTo' fields.
-    """
-
     Email: EmailStr
-    """Email address of the recipient."""
     Name: str | None = None
-    """Optional name of the recipient."""
 
 
 class _Attachment(BaseModel):
-    """
-    Represents a single file attachment.
-    """
-
     Content: str
     """Base64-encoded string of the file content."""
     Filename: str
-    """The filename of the attachment."""
     ContentID: str | None = None
     """Optional Content-ID (cid) for inline attachments."""
     ContentType: str | None = None
@@ -31,33 +19,19 @@ class _Attachment(BaseModel):
 
 
 class _MailpitEmailSchema(BaseModel):
-    """
-    Defines the JSON schema for sending an email via Mailpit.
-    """
-
     From: _Recipient
-    """The sender of the email."""
     To: list[_Recipient] = []
-    """'To' recipients."""
 
     Subject: str | None = None
-    """The email subject line."""
     HTML: str | None = None
-    """The HTML body of the message."""
     Text: str | None = None
-    """The plain text body of the message."""
 
     Cc: list[_Recipient] | None = None
-    """'Cc' recipients."""
     Bcc: list[EmailStr] | None = None
-    """'Bcc' recipients (email only)."""
     ReplyTo: list[_Recipient] | None = None
-    """Optional 'Reply-To' recipients."""
 
     Headers: dict[str, str] | None = None
-    """Optional headers in key:value format."""
     Attachments: list[_Attachment] | None = None
-    """A list of attachments."""
     Tags: list[str] | None = None
     """Optional Mailpit tags for categorization."""
 
