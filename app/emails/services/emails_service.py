@@ -2,7 +2,7 @@ from enum import Enum
 from string import Template
 
 from app.users.schemas.user_schema import UserInDB
-from app.emails.interfaces.base_email_client import BaseEmailClient
+from app.emails.clients.base import BaseEmailClient
 from app.emails.schema.email import Email
 from app.emails._global_state import get_client
 

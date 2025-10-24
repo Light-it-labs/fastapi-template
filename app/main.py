@@ -44,10 +44,7 @@ celery.config_from_object(celery_settings)
 from app import emails
 
 if settings.RUN_ENV == "local":
-    email_client = emails.MailpitEmailClient(
-        mailpit_uri=settings.MAILPIT_URI,
-        timeout_in_seconds=settings.MAILPIT_REQUEST_TIMEOUT_IN_SECONDS,
-    )
+    email_client = emails.MailpitEmailClient()
 else:
     email_client = emails.ExampleEmailClient()
 emails.set_client(email_client)

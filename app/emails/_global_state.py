@@ -1,4 +1,4 @@
-from app.emails.interfaces.base_email_client import BaseEmailClient
+from app.emails.clients.base import BaseEmailClient
 from app.emails.exceptions import GlobalEmailClientNotSetException
 
 _client: BaseEmailClient | None = None

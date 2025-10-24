@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     FORWARD_MAILPIT_PORT: int = 1025
     FORWARD_MAILPIT_DASHBOARD_PORT: int = 8025
 
+    # Requests
+    REQUESTS_TIMEOUT_SECONDS: int = 1
+
     @model_validator(mode="before")
     @classmethod
     def assemble_mailpit_uri(cls, data: Any) -> Any:
