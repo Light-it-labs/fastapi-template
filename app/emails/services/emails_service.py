@@ -44,7 +44,7 @@ class EmailService:
             "Welcome",
         )
 
-        return self.email_client.send_email(email)
+        self.email_client.send_email(email)
 
     def send_user_remind_email(
         self,
@@ -56,4 +56,4 @@ class EmailService:
             "Welcome",
         )
 
-        return self.email_client.send_email(email)
+        self.email_client.send_email(email)

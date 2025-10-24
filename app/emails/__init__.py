@@ -5,5 +5,5 @@ from .clients.base import BaseEmailClient
 
 from ._global_state import set_client, get_client
 
-from .clients import MailpitEmailClient, ExampleEmailClient
+from .clients import MailpitEmailClient, ExampleEmailClient, CeleryTaskEmailClient
 from .services.emails_service import EmailService
