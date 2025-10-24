@@ -1,2 +1,3 @@
 from .mailpit_email_client import MailpitEmailClient
 from .example_email_client import ExampleEmailClient
+from .celery_task_email_client import CeleryTaskEmailClient

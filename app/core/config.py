@@ -1,7 +1,7 @@
 import logging
 import secrets
 from functools import lru_cache
-from typing import Any, Final, List, Optional, Union
+from typing import Any, Final, List, Literal, Optional, Union
 
 from pydantic import AnyHttpUrl, PostgresDsn, field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     AUTHENTICATION_API_RATE_LIMIT: str = "5 per minute"
     SECURE_COOKIE: bool = True
+    PROCESS_TYPE: Literal["api", "worker", "beat"]
 
     # Database
     POSTGRES_SERVER: str
@@ -49,8 +50,11 @@ class Settings(BaseSettings):
 
     # Mail
     SENDER_EMAIL: str = "test@test.com"
-    SEND_WELCOME_EMAIL_MAX_RETRIES: int = 5
-    SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: int = 5
+    SEND_EMAIL_MAX_RETRIES: int = 5
+    SEND_EMAIL_RETRY_BACKOFF_VALUE: int = 5
+    # TODO: configure individual emails
+    # SEND_WELCOME_EMAIL_MAX_RETRIES: int = 5
+    # SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: int = 5
 
     # Mailpit
     MAILPIT_URI: str | None = None

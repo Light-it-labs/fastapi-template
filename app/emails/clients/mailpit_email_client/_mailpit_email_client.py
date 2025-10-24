@@ -21,11 +21,7 @@ class MailpitEmailClient(BaseEmailClient, BaseRequestClient):
         super().__init__()
         self.base_url = mailpit_uri or settings.MAILPIT_URI
 
-    def send_email(
-        self,
-        /,
-        email: Email,
-    ) -> None:
+    def send_email(self, /, email: Email) -> None:
         schema = _MailpitEmailSchema.from_email(email)
 
         response = self._make_request(

@@ -44,7 +44,10 @@ celery.config_from_object(celery_settings)
 from app import emails
 
 if settings.RUN_ENV == "local":
-    email_client = emails.MailpitEmailClient()
+    if settings.PROCESS_TYPE == "api":
+        email_client = emails.CeleryTaskEmailClient()
+    else:
+        email_client = emails.MailpitEmailClient()
 else:
     email_client = emails.ExampleEmailClient()
 emails.set_client(email_client)
