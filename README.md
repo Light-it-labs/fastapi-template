@@ -28,3 +28,9 @@ We use ruff as linter, to run them on pre-commit please run `pre-commit install`
 
 - You can run tests locally by running `./tests-start.sh` (this will use your local database).
 - Tests can also run in docker container with the following command: `docker-compose exec api ./tests-start.sh`.
+
+### Emails
+
+For local development we use mailpit. With the application running, you can access it through `localhost:8025` by default. If needed, the port can be configured via the `FORWARD_MAILPIT_DASHBOARD_PORT` env variable.
+
+The email client is instantiated during app bootup in `main.py` via `app.emails.set_client`, and the `EmailService` will use that instance by default.
