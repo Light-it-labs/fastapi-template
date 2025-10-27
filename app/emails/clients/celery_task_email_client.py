@@ -1,7 +1,5 @@
-from app.common.exceptions import ExternalProviderException
-from app.core.config import settings
 from app.emails.clients.base import BaseEmailClient
-from app.emails.schema.email import Email
+from app.emails.schema.email import Email, EmailContext
 
 
 class CeleryTaskEmailClient(BaseEmailClient):
@@ -12,16 +10,12 @@ class CeleryTaskEmailClient(BaseEmailClient):
         self.task = send_email
 
     def send_email(self, /, email: Email) -> None:
+        if not email.context:
+            email.context = EmailContext()
+
         serialized_email = email.model_dump(
             mode="json",
             exclude_unset=True,
         )
 
-        self.task.apply_async(
-            args=(serialized_email,),
-            retry_policy={
-                "retry_errors": (ExternalProviderException,),
-                "max_retries": settings.SEND_EMAIL_MAX_RETRIES,
-                "interval_step": settings.SEND_EMAIL_RETRY_BACKOFF_VALUE,
-            },
-        )
+        self.task.delay(serialized_email)
