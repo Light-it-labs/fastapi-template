@@ -5,9 +5,10 @@ from app.core.config import settings
 
 class EmailContext(BaseModel):
     max_retries: NonNegativeInt = settings.SEND_EMAIL_MAX_RETRIES
-    backoff_value_in_seconds: NonNegativeInt = (
+    backoff_in_seconds: NonNegativeInt = (
         settings.SEND_EMAIL_RETRY_BACKOFF_VALUE
     )
+    error_message: str | None = None
 
 
 class Email(BaseModel):

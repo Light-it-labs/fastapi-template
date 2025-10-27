@@ -31,7 +31,7 @@ def send_email(self: Task, serialized_email: dict) -> None:
         client.send_email(email)
     except ExternalProviderException as exc:
         if email.context:
-            countdown_in_seconds = email.context.backoff_value_in_seconds * (
+            countdown_in_seconds = email.context.backoff_in_seconds * (
                 2**self.request.retries
             )
 

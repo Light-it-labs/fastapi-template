@@ -31,5 +31,8 @@ class MailpitEmailClient(BaseEmailClient, BaseRequestClient):
         )
 
         if not response:
-            message = "Email not sent, see logs for details."
+            if email.context and email.context.error_message:
+                message = email.context.error_message
+            else:
+                message = "Email not sent, see logs for details."
             raise ExternalProviderException(message)

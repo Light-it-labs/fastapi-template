@@ -47,7 +47,8 @@ class EmailService:
 
         email.context = EmailContext(
             max_retries=settings.SEND_WELCOME_EMAIL_MAX_RETRIES,
-            backoff_value_in_seconds=settings.SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE,
+            backoff_in_seconds=settings.SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE,
+            error_message=f"Sending new user email to user {user.id} failed",
         )
 
         self.email_client.send_email(email)
