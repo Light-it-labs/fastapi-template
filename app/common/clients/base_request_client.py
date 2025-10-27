@@ -51,10 +51,7 @@ class BaseRequestClient(ABC):
         exc: requests.exceptions.RequestException,
         url: str,
     ) -> str:
-        msg_data = {
-            "url": url,
-            "exception": exc,
-        }
+        msg_data = {"url": url, "exception": exc}
 
         if exc.response:
             msg_data["response"] = exc.response.text
