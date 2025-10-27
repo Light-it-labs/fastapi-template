@@ -21,11 +21,7 @@ class MailpitEmailClient(BaseEmailClient, BaseRequestClient):
         super().__init__()
         self.base_url = mailpit_uri or settings.MAILPIT_URI
 
-    def send_email(
-        self,
-        /,
-        email: Email,
-    ) -> None:
+    def send_email(self, /, email: Email) -> None:
         schema = _MailpitEmailSchema.from_email(email)
 
         response = self._make_request(
@@ -35,5 +31,8 @@ class MailpitEmailClient(BaseEmailClient, BaseRequestClient):
         )
 
         if not response:
-            message = "Email not sent, see logs for details."
+            if email.context and email.context.error_message:
+                message = email.context.error_message
+            else:
+                message = "Email not sent, see logs for details."
             raise ExternalProviderException(message)

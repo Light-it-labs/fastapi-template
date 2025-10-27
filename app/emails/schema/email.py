@@ -1,6 +1,14 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, NonNegativeInt
 
 from app.core.config import settings
+
+
+class EmailContext(BaseModel):
+    max_retries: NonNegativeInt = settings.SEND_EMAIL_MAX_RETRIES
+    backoff_in_seconds: NonNegativeInt = (
+        settings.SEND_EMAIL_RETRY_BACKOFF_VALUE
+    )
+    error_message: str | None = None
 
 
 class Email(BaseModel):
@@ -18,3 +26,5 @@ class Email(BaseModel):
         "MIME-Version": "1.0",
         "Content-Type": "text/html",
     }
+
+    context: EmailContext | None = None
