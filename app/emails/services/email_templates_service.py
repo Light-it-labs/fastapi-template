@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 
 
 class EmailTemplate(Enum):
-    WELCOME = "welcome_email.j2"
+    WELCOME = "welcome.j2"
     OTHER = "_base.j2"
 
 
