@@ -1,15 +1,18 @@
+from typing import Final
+
 from celery import Task
 
-from app.common.exceptions.external_provider_exception import (
-    ExternalProviderException,
-)
+from app.common.exceptions import ExternalProviderException
 from app.common.schemas.pagination_schema import ListFilter
-from app.emails import Email, EmailService, get_client
 from app.db.session import SessionLocal
+from app.emails import Email, EmailService, get_client
 from app.main import celery
 
 from app.users.schemas.user_schema import UserInDB
 from app.users.services.users_service import UsersService
+
+
+BACKOFF_EXPONENTIAL_GROWTH_BASE: Final[int] = 2
 
 
 @celery.task
@@ -30,15 +33,14 @@ def send_email(self: Task, serialized_email: dict) -> None:
     try:
         client.send_email(email)
     except ExternalProviderException as exc:
-        if email.context:
-            countdown_in_seconds = email.context.backoff_in_seconds * (
-                2**self.request.retries
-            )
+        if not email.context:
+            raise
 
-            raise self.retry(
-                exc=exc,
-                max_retries=email.context.max_retries,
-                countdown=countdown_in_seconds,
-            )
+        multiplicator = BACKOFF_EXPONENTIAL_GROWTH_BASE**self.request.retries
+        countdown_in_seconds = email.context.backoff_in_seconds * multiplicator
 
-        raise
+        raise self.retry(
+            exc=exc,
+            max_retries=email.context.max_retries,
+            countdown=countdown_in_seconds,
+        )
