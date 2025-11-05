@@ -16,8 +16,7 @@ class _WelcomeKwargs(TypedDict):
 
 
 class _OtherKwargs(TypedDict):
-    title: str
-    body: str
+    pass
 
 
 class EmailTemplatesService:
