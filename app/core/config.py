@@ -23,7 +23,9 @@ class Settings(BaseSettings):
         frozen=True,
     )
     # APP
-    RUN_ENV: Literal["local", "develop", "staging", "production"] = "local"
+    RUN_ENV: Literal["local", "develop", "staging", "production", "test"] = (
+        "local"
+    )
     PROCESS_TYPE: Literal["api", "worker", "beat"]
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
