@@ -1,9 +1,15 @@
-{% extends "_base.j2" %}
+{% extends "layouts/base.j2" %}
 
-{% block title %}
-    Welcome
-{% endblock title %}
+{% from "components/heading.j2" import heading %}
+{% from "components/paragraph.j2" import paragraph %}
+{% from "components/signature.j2" import signature %}
 
 {% block body %}
-    <h1>Welcome {{ name }}</h1>
+    {% call heading() %}
+        Welcome {{ name|e }}
+    {% endcall %}
+    {% call paragraph() %}
+        Thank you for signing up.
+    {% endcall %}
+    {{ signature() }}
 {% endblock body %}

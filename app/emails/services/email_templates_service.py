@@ -8,7 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 
 class EmailTemplate(Enum):
     WELCOME = "welcome.j2"
-    OTHER = "_base.j2"
+    OTHER = "other.j2"
 
 
 class _WelcomeKwargs(TypedDict):
@@ -29,6 +29,8 @@ class EmailTemplatesService:
 
         cls._environment = Environment(
             loader=FileSystemLoader("app/emails/templates"),
+            trim_blocks=True,
+            lstrip_blocks=True,
         )
 
         cls._instance = super().__new__(cls)

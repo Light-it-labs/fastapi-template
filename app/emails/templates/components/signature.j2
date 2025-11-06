@@ -1,0 +1,7 @@
+{% set _style = "text-align: center; margin-top: 32px; color: #4b19e1;" %}
+
+{% macro signature(company="Light-It", attributes="") %}
+    <p style="{{ _style }}" {{ attributes }}>
+        Regards,<br><strong>{{ company }}</strong>
+    </p>
+{% endmacro %}
