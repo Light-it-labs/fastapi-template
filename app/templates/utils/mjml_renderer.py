@@ -1,2 +1,5 @@
-def mjml_renderer(input: str) -> str:
-    raise NotImplementedError()
+import mjml
+
+
+def render_mjml(input: str) -> str:
+    return mjml.mjml2html(input, disable_comments=True)

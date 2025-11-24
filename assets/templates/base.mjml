@@ -1,0 +1,85 @@
+<mjml lang="en">
+  <mj-head>
+    <mj-title>Welcome to Light-It</mj-title>
+    <mj-preview>
+      Thank you for subscribing to our service. We are glad to have you with us.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+    </mj-preview>
+
+    <mj-font
+      name="Ubuntu"
+      href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700"
+    />
+
+    <mj-attributes>
+      <mj-all font-family="Ubuntu, Helvetica, Arial, sans-serif" />
+      <mj-text font-size="16px" line-height="24px" color="#4b19e1" />
+      <mj-section padding="0px" />
+    </mj-attributes>
+
+    <mj-raw>
+      <meta name="color-scheme" content="light dark" />
+      <meta name="supported-color-schemes" content="light dark" />
+    </mj-raw>
+
+    <mj-style>
+      @media (prefers-color-scheme: dark) {
+        .dark-bg-main { background-color: #1a1a1a !important; }
+        .dark-bg-header { background-color: #2d2d2d !important; }
+        .dark-text-body { color: #ffffff !important; }
+        .dark-text-footer { color: #cccccc !important; } 
+      }
+    </mj-style>
+  </mj-head>
+
+  <mj-body background-color="#ffffff" css-class="dark-bg-main">
+    <mj-section background-color="#4b19e1" css-class="dark-bg-header">
+      <mj-column>
+        <mj-image
+          src="https://lightit.io/images/Logo_full.png"
+          alt="Light-It Logo"
+          width="160px"
+          align="center"
+        />
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f5f1ff" css-class="dark-bg-main">
+      <mj-column>
+        <mj-text
+          align="left"
+          font-size="20px"
+          padding-left="10px"
+          padding-bottom="30px"
+          css-class="dark-text-body"
+        >
+          Hello {{ name }},
+        </mj-text>
+
+        <mj-text
+          align="left"
+          font-size="15px"
+          padding-left="10px"
+          padding-bottom="30px"
+          css-class="dark-text-body"
+        >
+          Thank you for subscribing to our service.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#4b19e1" css-class="dark-bg-header">
+      <mj-column>
+        <mj-text
+          align="center"
+          font-size="15px"
+          padding-top="10px"
+          padding-bottom="10px"
+          color="#f5f1ff"
+          css-class="dark-text-footer"
+        >
+          &copy; Light-It. All rights reserved.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
