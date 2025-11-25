@@ -1,9 +1,0 @@
-{% macro _style(align, margin) %}
-    "text-align: {{ align }}; color: #4b19e1; margin-bottom: {{ margin }};"
-{% endmacro %}
-
-{% macro paragraph(align="center", margin="24px", attributes="") %}
-    <p style={{ _style(align, margin) }} {{ attributes }}>
-        {{ caller() }}
-    </p>
-{% endmacro %}
