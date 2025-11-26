@@ -1,9 +1,5 @@
-from typing import ClassVar
-
 from app import templates
 
 
-class NewUserTemplate(templates.BaseEmailTemplate):
-    path: ClassVar = "test.mjml"
-
+class NewUserTemplate(templates.BaseEmailTemplate, path="base.mjml"):
     name: str

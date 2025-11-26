@@ -1,9 +1,13 @@
 from abc import ABC
 
-import app.templates.utils as _utils
+from app.templates import utils
 
 from .base_template import BaseTemplate
 
 
-class BaseEmailTemplate(BaseTemplate, ABC):
-    pipeline = (_utils.render_mjml,)
+class BaseEmailTemplate(
+    BaseTemplate,
+    ABC,
+    pipeline=(utils.render_mjml,),
+):
+    pass

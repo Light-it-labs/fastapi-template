@@ -1,6 +1,6 @@
-from .post_processor import PostProcessor, PostProcessingPipeline
+from .processor import Processor, ProcessingPipeline
 
 __all__ = (
-    "PostProcessor",
-    "PostProcessingPipeline",
+    "Processor",
+    "ProcessingPipeline",
 )
