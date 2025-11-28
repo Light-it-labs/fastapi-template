@@ -1,0 +1,23 @@
+{% extends "layouts/header_body_footer.mjml" %}
+
+{% block title %}
+Welcome to Light-It
+{% endblock title %}
+
+{% block preview %}
+Welcome to Light-It!
+{% endblock preview %}
+
+{% block body %}
+<mj-section mj-class="template-bg-light" css-class="dark-bg-main">
+  <mj-column padding="20px 0">
+    <mj-text mj-class="template-heading" css-class="dark-text-body">
+      Hello {{ name }},
+    </mj-text>
+
+    <mj-text mj-class="template-body-text" css-class="dark-text-body">
+      Thank you for subscribing to our service.
+    </mj-text>
+  </mj-column>
+</mj-section>
+{% endblock body %}
