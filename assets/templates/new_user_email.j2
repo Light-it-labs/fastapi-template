@@ -1,0 +1,25 @@
+{% extends "layouts/1_column_branded.j2" %}
+
+{% from "components/atoms/text.j2" import text %}
+
+
+{% block title %}
+Welcome to Light-it
+{% endblock title %}
+
+{% block preview %}
+Welcome to Light-it!
+{% endblock preview %}
+
+
+{% block body %}
+
+  {% call text() %}
+    Hello {{ name }}
+  {% endcall %}
+
+  {% call text() %}
+    Thank you for subscribing to our service.
+  {% endcall %}
+
+{% endblock body %}

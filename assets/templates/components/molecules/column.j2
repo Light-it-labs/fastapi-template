@@ -1,0 +1,13 @@
+{% from "constants/theme.j2" import theme %}
+{% from "utils/render_attributes.j2" import render_attributes %}
+
+{% macro column(styles={}) %}
+   {% set defaults = {
+     'padding': '0px',
+     'vertical-align': 'top'
+   } %}
+
+   <mj-column {{ render_attributes(defaults, styles) }}>
+      {{ caller() }}
+   </mj-column>
+{% endmacro %}

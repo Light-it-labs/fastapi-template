@@ -1,0 +1,22 @@
+{% from "constants/theme.j2" import theme %}
+{% from "utils/render_attributes.j2" import render_attributes %}
+
+{% macro section(variant='white', styles={}) %}
+  
+  {% set defaults = {
+    'padding': theme.spacing.md,
+  } %}
+
+  {% set variants = {
+    'white': {
+      'background-color': theme.colors.white,
+    },
+    'brand': {
+      'background-color': theme.colors.primary,
+    },
+  } %}
+
+  <mj-section {{ render_attributes(defaults, variants.get(variant), styles) }}>
+    {{ caller() }}
+  </mj-section>
+{% endmacro %}

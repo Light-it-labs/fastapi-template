@@ -1,0 +1,37 @@
+{% extends "layouts/_base.j2" %}
+
+{% from "components/molecules/section.j2" import section %}
+{% from "components/molecules/column.j2" import column %}
+{% from "components/atoms/image.j2" import image %}
+{% from "components/atoms/text.j2" import text %}
+
+
+{% block content %}
+
+  {% call section(variant="brand") %}
+    {% call column() %}
+      {{
+        image(
+          src="https://lightit.io/images/Logo_full.png",
+          alt="Light-it Logo",
+          styles={"width": "160px"},
+        )
+      }}
+    {% endcall %}
+  {% endcall %}
+  
+  {% call section() %}
+    {% call column() %}
+      {% block body required %}{% endblock body %}
+    {% endcall %}
+  {% endcall %}
+
+  {% call section() %}
+    {% call column() %}
+      {% call text(variant="small", styles={"align": "center"}) %}
+        &copy; Light-It. All rights reserved.
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+
+{% endblock content %}
