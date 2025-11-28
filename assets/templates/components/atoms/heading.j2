@@ -1,0 +1,31 @@
+{% from "constants/theme.j2" import theme %}
+{% from "utils/render_attributes.j2" import render_attributes %}
+
+{% macro text(variant='h1', styles={}) %}
+  
+  {% set defaults = {
+    'color': theme.colors.primary,
+    'font-family': theme.typography.family,
+    'font-weight': theme.typography.weights.bold,
+    'line-height': theme.typography.line_heights.normal,
+    'padding-bottom': theme.spacing.lg,
+    'align': 'left',
+  } %}
+
+  {% set variants = {
+    'h1': {
+      'font-size': theme.typography.sizes.xxl,
+    },
+    'h2': {
+      'font-size': theme.typography.sizes.xl,
+    },
+    'h3': {
+      'font-size': theme.typography.sizes.lg,
+      'padding-bottom': theme.spacing.md,
+    },
+  } %}
+
+  <mj-text {{ render_attributes(defaults, variants.get(variant), styles) }}>
+    {{ caller() }}
+  </mj-text>
+{% endmacro %}

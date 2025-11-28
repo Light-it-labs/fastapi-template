@@ -1,0 +1,11 @@
+{% macro render_attributes() %}
+  {% set ns = namespace(styles={}) %}
+  
+  {% for style_dict in varargs %}
+    {% if style_dict %}
+      {% set ns.styles = dict(ns.styles, **style_dict) %}
+    {% endif %}
+  {% endfor %}
+
+  {{ ns.styles | xmlattr }}
+{% endmacro %}

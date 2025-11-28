@@ -1,0 +1,25 @@
+{% from "constants/fonts.j2" import fonts %}
+
+<mjml lang="en">
+  <mj-head>
+    <mj-title>
+      {% block title %}{% endblock title %}
+    </mj-title>
+
+    <mj-preview>
+      {% block preview %}{% endblock preview %}
+    </mj-preview>
+
+    {% for font_name, font_href in fonts.items() %}
+    <mj-font
+      name="{{ font_name }}"
+      href="{{ font_href }}"
+    />
+    {% endfor %}
+
+  </mj-head>
+
+  <mj-body>
+    {% block content required %}{% endblock content %}
+  </mj-body>
+</mjml>

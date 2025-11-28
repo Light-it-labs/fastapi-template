@@ -1,0 +1,17 @@
+{% from "constants/theme.j2" import theme %}
+{% from "utils/render_attributes.j2" import render_attributes %}
+
+{% macro image(src, alt='', styles={}) %}
+  {% set defaults = {
+    'width': 'auto',
+    'align': 'center',
+    'padding-top': theme.spacing.lg,
+    'padding-bottom': theme.spacing.lg,
+  } %}
+
+  <mj-image
+    src="{{ src }}"
+    alt="{{ alt }}"
+    {{ render_attributes(defaults, styles) }}
+  />
+{% endmacro %}
