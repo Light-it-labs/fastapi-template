@@ -7,9 +7,6 @@ from app.emails.clients.base import BaseEmailClient
 from app.emails.schema.email import Email, EmailContext
 
 
-# TODO: the service will not be coupled to different modules once the
-# rendering of the notification is refactored out to a Notification class.
-# Then those implementation details will be contained on each module.
 class EmailService:
     def __init__(self, email_client: BaseEmailClient | None = None):
         self.email_client = email_client or get_client()
