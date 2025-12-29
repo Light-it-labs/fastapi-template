@@ -25,6 +25,8 @@ def get_celery_settings() -> dict:
         "broker_connection_retry_on_startup": True,
         "worker_send_task_events": True,
         "broker_transport_options": get_transport_options(),
+        "beat_schedule_filename": ".celery/celerybeat-schedule",
+        "beat_pidfile": ".celery/celerybeat.pid",
         "beat_schedule": {
             "send_reminder_email": {
                 "task": "app.celery.tasks.emails.send_reminder_email",
