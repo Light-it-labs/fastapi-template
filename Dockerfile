@@ -8,7 +8,7 @@ ARG BASE_DIR=/code
 
 # Setup uv environment outside BASE_DIR
 # This prevents it from being hidden when docker compose mounts over /code
-ENV UV_PROJECT_ENVIRONMENT=/.venv
+ARG UV_PROJECT_ENVIRONMENT=/.venv
 
 # Install the project into BASE_DIR
 WORKDIR $BASE_DIR
@@ -47,5 +47,4 @@ ENTRYPOINT []
 RUN chmod +x $BASE_DIR/tests-start.sh
 RUN chmod +x /docker-entrypoint.sh
 
-# Use the non-root user to run our application
 CMD ["/docker-entrypoint.sh"]
