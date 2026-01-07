@@ -22,6 +22,9 @@ Auth Service in FastAPI
    source .venv/bin/activate
    ```
 
+   > [!TIP]
+   > If the virtual environment is not active in your shell, run commands inside it with `uv run <command>`
+
 ### Run dockerized project
 
 1. Create `.env`
