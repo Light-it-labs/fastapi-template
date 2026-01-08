@@ -1,24 +1,23 @@
 from uuid import UUID
+
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
-
 from app.common.repositories.base_repository import BaseRepository
 from app.two_factor_authentication.models.user_2fa import Users2FA
-from app.two_factor_authentication.schemas.user_2fa_schema import (
-    User2FACreate,
-    User2FAUpdate,
-)
+from app.two_factor_authentication.schemas.user_2fa_schema import User2FACreate
+from app.two_factor_authentication.schemas.user_2fa_schema import User2FAUpdate
 
 
 class Users2FARepository(
-    BaseRepository[Users2FA, User2FACreate, User2FAUpdate]
+    BaseRepository[Users2FA, User2FACreate, User2FAUpdate],
+    model_cls=Users2FA,
 ):
     def get_by_user_id(
         self, session: Session, user_id: UUID
     ) -> Users2FA | None:
         return (
-            session.query(self.model)
+            session.query(self.MODEL_CLS)
             .filter(Users2FA.user_id == user_id)
             .first()
         )
@@ -35,4 +34,4 @@ class Users2FARepository(
         session.flush()
 
 
-users_2fa_repository = Users2FARepository(Users2FA)
+users_2fa_repository = Users2FARepository()

@@ -1,48 +1,43 @@
+import abc
 from math import ceil
-from typing import Any, Generic, Optional, Type, TypeVar
 from uuid import UUID
 
-from fastapi.encoders import jsonable_encoder
+import sqlalchemy as sa
 from pydantic import BaseModel
-from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import Query
 
-from app.common.schemas.pagination_schema import ListFilter, ListResponse
+from app.common.exceptions import ModelNotFoundException
+from app.common.models import Base
+from app.common.schemas.pagination_schema import ListFilter
+from app.common.schemas.pagination_schema import ListResponse
 
 
-ModelType = TypeVar("ModelType", bound=Any)
-CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
-UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+class BaseRepository[TModel: Base, TCreate: BaseModel, TUpdate: BaseModel](
+    abc.ABC
+):
+    MODEL_CLS: type[TModel]
 
+    def __init_subclass__(cls, *, model_cls: type[TModel]) -> None:
+        cls.MODEL_CLS = model_cls
 
-class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, model: Type[ModelType]):
-        """
-        CRUD object with default methods to Create, Read, Update, Delete (CRUD).
+    def get_by_id(self, db: Session, model_id: UUID) -> TModel | None:
+        stmt = sa.select(self.MODEL_CLS).where(self.MODEL_CLS.id == model_id)
 
-        **Parameters**
-
-        * `model`: A SQLAlchemy model class
-        * `schema`: A Pydantic model (schema) class
-        """
-        self.model = model
-
-    def get(self, db: Session, model_id: UUID) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == model_id).first()
+        return db.execute(stmt).scalar_one_or_none()
 
     def list(
         self, db: Session, list_options: ListFilter, query: Query | None = None
     ) -> ListResponse:
         if not query:
-            query = db.query(self.model)
+            query = db.query(self.MODEL_CLS)
 
         total = query.count()
 
         if list_options.order_by:
             column = list_options.order_by
             direction = list_options.order
-            by = desc if direction == "desc" else asc
+            by = sa.desc if direction == "desc" else sa.asc
 
             query = query.order_by(by(column))
 
@@ -57,27 +52,32 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             total_pages=ceil(total / list_options.page_size),
         )
 
-    def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
-        obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data)  # type: ignore
-        db.add(db_obj)
+    def create(self, db: Session, schema: TCreate) -> TModel:
+        model = self.MODEL_CLS(**schema.model_dump())
+        db.add(model)
         db.flush()
-        return db_obj
+        return model
 
-    def update(
-        self, db: Session, db_obj: ModelType, obj_in: UpdateSchemaType
-    ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
-        update_data = obj_in.dict(exclude_unset=True)
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
-        db.add(db_obj)
-        db.flush()
-        return db_obj
+    def update(self, db: Session, model_id: UUID, data: TUpdate) -> TModel:
+        stmt = (
+            sa.update(self.MODEL_CLS)
+            .where(self.MODEL_CLS.id == model_id)
+            .values(data.model_dump(exclude_unset=True))
+            .returning(self.MODEL_CLS)
+        )
 
-    def delete(self, db: Session, model_id: UUID) -> ModelType | None:
-        obj = db.query(self.model).get(model_id)
-        db.delete(obj)
-        db.flush()
-        return obj
+        model = db.execute(stmt).scalar_one_or_none()
+
+        if model is None:
+            raise ModelNotFoundException()
+
+        return model
+
+    def delete(self, db: Session, model_id: UUID) -> TModel | None:
+        stmt = (
+            sa.delete(self.MODEL_CLS)
+            .where(self.MODEL_CLS.id == model_id)
+            .returning(self.MODEL_CLS)
+        )
+
+        return db.execute(stmt).scalar_one_or_none()
