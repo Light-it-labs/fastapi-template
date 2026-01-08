@@ -1,11 +1,9 @@
-import abc
 from math import ceil
 from uuid import UUID
 
 import sqlalchemy as sa
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy.orm.query import Query
 
 from app.common.exceptions import ModelNotFoundException
 from app.common.models import Base
@@ -13,9 +11,7 @@ from app.common.schemas.pagination_schema import ListFilter
 from app.common.schemas.pagination_schema import ListResponse
 
 
-class BaseRepository[TModel: Base, TCreate: BaseModel, TUpdate: BaseModel](
-    abc.ABC
-):
+class BaseRepository[TModel: Base, TCreate: BaseModel, TUpdate: BaseModel]:
     MODEL_CLS: type[TModel]
 
     def __init_subclass__(cls, *, model_cls: type[TModel]) -> None:
@@ -27,25 +23,31 @@ class BaseRepository[TModel: Base, TCreate: BaseModel, TUpdate: BaseModel](
         return db.execute(stmt).scalar_one_or_none()
 
     def list(
-        self, db: Session, list_options: ListFilter, query: Query | None = None
+        self,
+        db: Session,
+        list_options: ListFilter,
+        stmt: sa.Select[tuple[TModel]] | None = None,
     ) -> ListResponse:
-        if not query:
-            query = db.query(self.MODEL_CLS)
+        if stmt is None:
+            stmt = sa.select(self.MODEL_CLS)
 
-        total = query.count()
+        total_stmt = sa.select(sa.func.count("*")).select_from(stmt.subquery())
+        total = db.execute(total_stmt).scalar_one()
 
         if list_options.order_by:
             column = list_options.order_by
             direction = list_options.order
             by = sa.desc if direction == "desc" else sa.asc
 
-            query = query.order_by(by(column))
+            stmt = stmt.order_by(by(column))
 
-        query = query.offset(list_options.page_size * (list_options.page - 1))
+        stmt = stmt.offset(list_options.page_size * (list_options.page - 1))
+        stmt = stmt.limit(list_options.page_size)
 
-        query = query.limit(list_options.page_size)
+        data = list(db.scalars(stmt))
+
         return ListResponse(
-            data=query.all(),
+            data=data,
             page=list_options.page,
             page_size=list_options.page_size,
             total=total,
