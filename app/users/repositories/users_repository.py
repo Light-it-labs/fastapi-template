@@ -8,10 +8,10 @@ from app.users.schemas.user_schema import UserUpdate
 
 class UsersRepository(
     BaseRepository[User, UserCreate, UserUpdate],
-    model_cls=User,
+    model=User,
 ):
     def get_by_email(self, db: Session, email: str) -> User | None:
-        return db.query(self.MODEL_CLS).filter(User.email == email).first()
+        return db.query(self.model).filter(self.model.email == email).first()
 
 
 users_repository = UsersRepository()

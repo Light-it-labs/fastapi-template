@@ -11,14 +11,14 @@ from app.two_factor_authentication.schemas.user_2fa_schema import User2FAUpdate
 
 class Users2FARepository(
     BaseRepository[Users2FA, User2FACreate, User2FAUpdate],
-    model_cls=Users2FA,
+    model=Users2FA,
 ):
     def get_by_user_id(
         self, session: Session, user_id: UUID
     ) -> Users2FA | None:
         return (
-            session.query(self.MODEL_CLS)
-            .filter(Users2FA.user_id == user_id)
+            session.query(self.model)
+            .filter(self.model.user_id == user_id)
             .first()
         )
 
@@ -26,8 +26,8 @@ class Users2FARepository(
         self, session: Session, user_2fa_id: UUID, active: bool
     ) -> None:
         stmt = (
-            update(Users2FA)
-            .where(Users2FA.id == user_2fa_id)
+            update(self.model)
+            .where(self.model.id == user_2fa_id)
             .values(active=active)
         )
         session.execute(stmt)
