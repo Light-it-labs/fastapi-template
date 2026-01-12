@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.common.repositories.base_repository import Paginator
 from app.common.schemas.pagination_schema import PaginatedResponse
 from app.common.schemas.pagination_schema import PaginationSettings
+from app.users.models.user import User
 from app.users.repositories.users_repository import UsersRepository
 from app.users.repositories.users_repository import users_repository
 from app.users.schemas.user_schema import UserCreate
@@ -36,12 +37,11 @@ class UsersService:
         created_user = self.repository.create(self.session, user)
         return UserInDB.model_validate(created_user)
 
-    def list(self, list_options: PaginationSettings) -> PaginatedResponse:
-        users, info = self.repository.list_paginated(
-            self.session, Paginator(list_options)
-        )
+    def list_paginated(
+        self, list_options: PaginationSettings
+    ) -> PaginatedResponse[UserInDB]:
+        paginator = Paginator[User](self.session, list_options)
+        models = self.repository.list_all(self.session, paginator)
+        schemas = [UserInDB.model_validate(user) for user in models]
 
-        return PaginatedResponse(
-            data=[UserInDB.model_validate(user) for user in users],
-            **info.model_dump(),
-        )
+        return paginator.wrap_data(schemas)

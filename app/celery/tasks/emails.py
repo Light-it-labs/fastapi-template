@@ -16,7 +16,7 @@ settings = get_settings()
 def send_reminder_email() -> None:
     session = SessionLocal()
     try:
-        users = UsersService(session).list(
+        users = UsersService(session).list_paginated(
             PaginationSettings(page=1, page_size=100)
         )
         for user in users.data:
