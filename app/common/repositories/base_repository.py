@@ -101,13 +101,10 @@ class BaseRepository[
     TCreate: BaseModel,
     TUpdate: BaseModel,
 ]:
-    _DEFAULT_MODEL: type[TModel]
+    model: type[TModel]
 
     def __init_subclass__(cls, *, model: type[TModel]) -> None:
-        cls._DEFAULT_MODEL = model
-
-    def __init__(self, model: type[TModel] | None = None) -> None:
-        self.model = self._DEFAULT_MODEL if model is None else model
+        cls.model = model
 
     def get_by_id(self, db: Session, model_id: UUID) -> TModel | None:
         stmt = sa.select(self.model).where(self.model.id == model_id)
