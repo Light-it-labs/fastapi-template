@@ -1,83 +1,141 @@
+import abc
+import typing as t
 from math import ceil
-from typing import Any, Generic, Optional, Type, TypeVar
 from uuid import UUID
 
-from fastapi.encoders import jsonable_encoder
+import sqlalchemy as sa
 from pydantic import BaseModel
-from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
-from sqlalchemy.orm.query import Query
 
-from app.common.schemas.pagination_schema import ListFilter, ListResponse
+from app.common.exceptions import ModelNotFoundException
+from app.common.models import Base
+from app.common.schemas.pagination_schema import PaginationInfo
+from app.common.schemas.pagination_schema import PaginationSettings
+
+type _Statement[TModel: Base] = sa.Select[tuple[TModel]]
 
 
-ModelType = TypeVar("ModelType", bound=Any)
-CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
-UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+class BaseQueryProcessor[TModel: Base](abc.ABC):
+    @abc.abstractmethod
+    def __call__(self, stmt: _Statement[TModel]) -> _Statement[TModel]:
+        pass
 
 
-class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, model: Type[ModelType]):
-        """
-        CRUD object with default methods to Create, Read, Update, Delete (CRUD).
+class Paginator[TModel: Base](BaseQueryProcessor):
+    _session: Session
+    _settings: PaginationSettings
+    _info: PaginationInfo | None
 
-        **Parameters**
+    @property
+    def info(self) -> PaginationInfo:
+        if self._info is None:
+            self._raise_invalid_state()
 
-        * `model`: A SQLAlchemy model class
-        * `schema`: A Pydantic model (schema) class
-        """
-        self.model = model
+        return self._info
 
-    def get(self, db: Session, model_id: UUID) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == model_id).first()
+    def __init__(self, db: Session, settings: PaginationSettings) -> None:
+        self._session = db
+        self._settings = settings
+        self._info = None
 
-    def list(
-        self, db: Session, list_options: ListFilter, query: Query | None = None
-    ) -> ListResponse:
-        if not query:
-            query = db.query(self.model)
+    def __call__(self, stmt: _Statement[TModel]) -> _Statement[TModel]:
+        if self._info is not None:
+            self._raise_invalid_state()
 
-        total = query.count()
+        total = self._get_total(stmt)
 
-        if list_options.order_by:
-            column = list_options.order_by
-            direction = list_options.order
-            by = desc if direction == "desc" else asc
+        stmt = self._order(stmt)
 
-            query = query.order_by(by(column))
+        page = self._settings.page
+        page_size = self._settings.page_size
+        offset = page_size * (page - 1)
 
-        query = query.offset(list_options.page_size * (list_options.page - 1))
+        stmt = stmt.offset(offset)
+        stmt = stmt.limit(page_size)
 
-        query = query.limit(list_options.page_size)
-        return ListResponse(
-            data=query.all(),
-            page=list_options.page,
-            page_size=list_options.page_size,
+        total_pages = ceil(total / page_size)
+        if page > total_pages:
+            page = total_pages
+
+        self._info = PaginationInfo(
+            page=page,
+            page_size=page_size,
             total=total,
-            total_pages=ceil(total / list_options.page_size),
+            total_pages=total_pages,
         )
 
-    def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
-        obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data)  # type: ignore
-        db.add(db_obj)
-        db.flush()
-        return db_obj
+        return stmt
 
-    def update(
-        self, db: Session, db_obj: ModelType, obj_in: UpdateSchemaType
-    ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
-        update_data = obj_in.dict(exclude_unset=True)
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
-        db.add(db_obj)
-        db.flush()
-        return db_obj
+    def _get_total(self, stmt: _Statement[TModel]) -> int:
+        total_stmt = sa.select(sa.func.count("*")).select_from(stmt.subquery())
+        return self._session.execute(total_stmt).scalar_one()
 
-    def delete(self, db: Session, model_id: UUID) -> ModelType | None:
-        obj = db.query(self.model).get(model_id)
-        db.delete(obj)
+    def _order(self, stmt: _Statement[TModel]) -> _Statement[TModel]:
+        if self._settings.order_by is None:
+            return stmt
+
+        column = self._settings.order_by
+        direction = self._settings.order
+        by = sa.desc if direction == "desc" else sa.asc
+
+        return stmt.order_by(by(column))
+
+    def _raise_invalid_state(self) -> t.NoReturn:
+        mod = "already" if self._info is not None else "not"
+        msg = f"Paginator has {mod} run"
+        raise RuntimeError(msg)
+
+
+class BaseRepository[
+    TModel: Base,
+    TCreate: BaseModel,
+    TUpdate: BaseModel,
+]:
+    model: type[TModel]
+
+    def __init_subclass__(cls, *, model: type[TModel]) -> None:
+        cls.model = model
+
+    def get_by_id(self, db: Session, model_id: UUID) -> TModel | None:
+        stmt = sa.select(self.model).where(self.model.id == model_id)
+
+        return db.execute(stmt).scalar_one_or_none()
+
+    def list_all(
+        self, db: Session, processor: BaseQueryProcessor | None = None
+    ) -> list[TModel]:
+        stmt = sa.select(self.model)
+        if processor is not None:
+            stmt = processor(stmt)
+
+        return list(db.scalars(stmt))
+
+    def create(self, db: Session, schema: TCreate) -> TModel:
+        model = self.model(**schema.model_dump())
+        db.add(model)
         db.flush()
-        return obj
+        return model
+
+    def update(self, db: Session, model_id: UUID, data: TUpdate) -> TModel:
+        stmt = (
+            sa.update(self.model)
+            .where(self.model.id == model_id)
+            .values(data.model_dump(exclude_unset=True))
+            .returning(self.model)
+        )
+
+        model = db.execute(stmt).scalar_one_or_none()
+
+        if model is None:
+            raise ModelNotFoundException()
+
+        return model
+
+    def delete(self, db: Session, model_id: UUID) -> TModel | None:
+        stmt = (
+            sa.delete(self.model)
+            .where(self.model.id == model_id)
+            .returning(self.model)
+        )
+
+        return db.execute(stmt).scalar_one_or_none()
