@@ -43,5 +43,4 @@ class UsersService:
         paginator = Paginator[User](self.session, list_options)
         models = self.repository.list_all(self.session, paginator)
         schemas = [UserInDB.model_validate(user) for user in models]
-
-        return paginator.wrap_data(schemas)
+        return PaginatedResponse.from_data(schemas, paginator.info)

@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 
 from app.common.exceptions import ModelNotFoundException
 from app.common.models import Base
-from app.common.schemas.pagination_schema import PaginatedResponse
 from app.common.schemas.pagination_schema import PaginationInfo
 from app.common.schemas.pagination_schema import PaginationSettings
 
@@ -80,15 +79,6 @@ class Paginator[TModel: Base](BaseQueryProcessor):
         by = sa.desc if direction == "desc" else sa.asc
 
         return stmt.order_by(by(column))
-
-    def wrap_data[T](self, /, data: list[T]) -> PaginatedResponse[T]:
-        if self._info is None:
-            raise RuntimeError("Paginator has not run")
-
-        return PaginatedResponse(
-            data=data,
-            **self.info.model_dump(),
-        )
 
     def _raise_invalid_state(self) -> t.NoReturn:
         mod = "already" if self._info is not None else "not"
