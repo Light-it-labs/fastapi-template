@@ -2,9 +2,6 @@
 
 SERVER_PORT=${SERVER_PORT:-8000}
 
-# Let the DB start
-python api_pre_start.py
-
 # Run migrations
 alembic upgrade head
 
