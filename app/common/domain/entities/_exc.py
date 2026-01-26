@@ -11,8 +11,8 @@ import typing as t
 from . import _utils
 
 if t.TYPE_CHECKING:
-    from .base_entity import BaseEntity
-    from .base_entity import _DtoConstraint
+    from .entity import Entity
+    from .entity import _DtoConstraint
 
 
 class EntityDefinitionError(Exception):
@@ -22,7 +22,7 @@ class EntityDefinitionError(Exception):
 class MissingDtoError(EntityDefinitionError):
     def __init__(
         self,
-        entity_cls: type[BaseEntity],
+        entity_cls: type[Entity],
         missing_dto_constraint: _DtoConstraint,
     ) -> None:
         dto_name, dto_cls = missing_dto_constraint
@@ -50,7 +50,7 @@ class MissingDtoError(EntityDefinitionError):
 class InvalidDtoError(EntityDefinitionError):
     def __init__(
         self,
-        entity_cls: type[BaseEntity],
+        entity_cls: type[Entity],
         invalid_dto_constraint: _DtoConstraint,
     ) -> None:
         dto_name, dto_cls = invalid_dto_constraint

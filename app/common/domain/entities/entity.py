@@ -1,4 +1,4 @@
-__all__ = ("BaseEntity",)
+__all__ = ("Entity",)
 
 import typing as t
 
@@ -22,7 +22,7 @@ type _EntityDefinitionErrors = t.Sequence[_exc.EntityDefinitionError]
 # TODO: schema registry and automatic model rebuilding (fix circular imports for good)
 # TODO: sentinel for unloaded relationships (fix shape of data problem)
 @t.final
-class BaseEntity(pydantic.BaseModel):
+class Entity(pydantic.BaseModel):
     """
     Base model of the application, representing an object in the db.
 
@@ -31,7 +31,7 @@ class BaseEntity(pydantic.BaseModel):
 
     ## Example:
     ```
-    class User(BaseEntity):
+    class User(Entity):
         id: UserId
         name: str
         last_name: str
