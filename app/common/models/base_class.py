@@ -1,12 +1,15 @@
-from uuid import UUID, uuid4
 from datetime import datetime
+from enum import Enum
+from typing import Literal
+from uuid import UUID
+from uuid import uuid4
 
-from sqlalchemy import MetaData, func, UUID as SQLA_UUID, DateTime
-from sqlalchemy.orm import (
-    DeclarativeBase,
-    Mapped,
-    mapped_column,
-)
+from sqlalchemy import MetaData
+from sqlalchemy import func
+from sqlalchemy import types
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
 
 
 class Base(DeclarativeBase):
@@ -23,8 +26,10 @@ class Base(DeclarativeBase):
     )
 
     type_annotation_map = {
-        UUID: SQLA_UUID,
-        datetime: DateTime(timezone=True),
+        UUID: types.UUID,
+        datetime: types.DateTime(timezone=True),
+        Enum: types.Enum(Enum, native_enum=False),
+        Literal: types.Enum(Enum, native_enum=False),
     }
 
     id: Mapped[UUID] = mapped_column(
