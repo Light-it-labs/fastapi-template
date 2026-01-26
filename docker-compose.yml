@@ -10,6 +10,11 @@ services:
       - ${DB_PORT:-5432}:5432
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   test-db:
     image: postgres:16.9
@@ -27,8 +32,11 @@ services:
   api:
     build:
       context: .
+      args:
+        - RUN_ENV=${RUN_ENV:-local}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     container_name: app-api
     env_file:
       - .env
@@ -40,13 +48,25 @@ services:
       - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-http://localstack:4566}
     ports:
       - ${API_PORT:-8000}:8000
-    volumes:
-      - ./:/code/
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /code
+          ignore:
+            - .venv/
+            - .env
+        - action: rebuild
+          path: ./uv.lock
+        - action: rebuild
+          path: ./.env
 
   celery_worker:
     container_name: celery-worker
     build:
       context: .
+      args:
+        - RUN_ENV=${RUN_ENV:-local}
     entrypoint:
       - app/celery/start-celery-worker.sh
     depends_on:
@@ -62,13 +82,25 @@ services:
       - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-http://localstack:4566}
     ports:
       - "6379:6379"
-    volumes:
-      - ./:/code/
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /code
+          ignore:
+            - .venv/
+            - .env
+        - action: rebuild
+          path: ./uv.lock
+        - action: rebuild
+          path: ./.env
 
   celery_beat:
     container_name: celery-beat
     build:
       context: .
+      args:
+        - RUN_ENV=${RUN_ENV:-local}
     entrypoint:
       - app/celery/start-celery-beat.sh
     depends_on:
@@ -83,8 +115,18 @@ services:
       - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-http://localstack:4566}
     ports:
       - "6479:6479"
-    volumes:
-      - ./:/code/
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /code
+          ignore:
+            - .venv/
+            - .env
+        - action: rebuild
+          path: ./uv.lock
+        - action: rebuild
+          path: ./.env
 
   localstack:
     container_name: localstack-main
