@@ -18,54 +18,54 @@ class Repository[
     # Single entity operations
     @abc.abstractmethod
     def find(self, entity_id: TEntityId) -> TEntity | None:
-        """Return entity by ID or None if not found."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def find_or_fail(self, entity_id: TEntityId) -> TEntity:
-        """Return entity by ID or raise EntityNotFoundError."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def create(self, dto: TCreate) -> TEntity:
-        """Persist a new entity and return it."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def update(self, entity_id: TEntityId, dto: TUpdate) -> TEntity:
-        """Update an existing entity and return it."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def delete(self, entity_id: TEntityId) -> None:
-        """Delete an entity by ID."""
+        raise NotImplementedError()
 
     # Multiple entity operations
     @abc.abstractmethod
     def all(self) -> list[TEntity]:
-        """Return all entities."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def where(self, *criteria: Criteria[TEntity]) -> list[TEntity]:
-        """Return entities matching all given criteria."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def first(self, *criteria: Criteria[TEntity]) -> TEntity | None:
-        """Return first entity matching criteria or None."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def count(self, *criteria: Criteria[TEntity]) -> int:
-        """Return count of entities matching criteria."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def exists(self, *criteria: Criteria[TEntity]) -> bool:
-        """Return True if any entity matches criteria."""
+        raise NotImplementedError()
 
     # Bulk operations
     @abc.abstractmethod
     def insert_many(self, dtos: list[TCreate]) -> list[TEntity]:
-        """Persist multiple new entities and return them."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def update_where(self, dto: TUpdate, *criteria: Criteria[TEntity]) -> int:
-        """Update entities matching criteria and return count of updated rows."""
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def delete_where(self, *criteria: Criteria[TEntity]) -> int:
-        """Delete entities matching criteria and return count of deleted rows."""
+        raise NotImplementedError()
