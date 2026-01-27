@@ -1,10 +1,10 @@
 from enum import Enum
 from string import Template
 
-from app.users.schemas.user_schema import UserInDB
+from app.emails._global_state import get_client
 from app.emails.clients.base import BaseEmailClient
 from app.emails.schema.email import Email
-from app.emails._global_state import get_client
+from app.users.schemas.user_schema import UserInDB
 
 
 class Paths(Enum):
@@ -44,7 +44,8 @@ class EmailService:
             "Welcome",
         )
 
-        return self.email_client.send_email(email)
+        error_message = f"Sending new user email to user {user.id} failed"
+        self.email_client.send_email(email, error_message)
 
     def send_user_remind_email(
         self,
@@ -56,4 +57,4 @@ class EmailService:
             "Welcome",
         )
 
-        return self.email_client.send_email(email)
+        self.email_client.send_email(email)

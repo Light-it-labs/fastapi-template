@@ -1,11 +1,17 @@
 import logging
 import secrets
 from functools import lru_cache
-from typing import Any, Final, List, Optional, Union
+from typing import Any, Final, List, Literal, Optional, Union
 
-from pydantic import AnyHttpUrl, PostgresDsn, field_validator, model_validator
+from pydantic import AnyHttpUrl
+from pydantic import EmailStr
+from pydantic import NonNegativeInt
+from pydantic import PostgresDsn
+from pydantic import field_validator
+from pydantic import model_validator
 from pydantic_core.core_schema import ValidationInfo
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -16,7 +22,8 @@ class Settings(BaseSettings):
         frozen=True,
     )
     # APP
-    RUN_ENV: str = "local"
+    RUN_ENV: Literal["local", "develop", "staging", "production"] = "local"
+    PROCESS_TYPE: Literal["api", "worker", "beat"]
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     SERVER_NAME: str
@@ -47,10 +54,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
-    # Mail
-    SENDER_EMAIL: str = "test@test.com"
-    SEND_WELCOME_EMAIL_MAX_RETRIES: int = 5
-    SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: int = 5
+    # Email - general
+    SENDER_EMAIL: EmailStr = "test@test.com"
+    SEND_EMAIL_MAX_RETRIES: NonNegativeInt = 5
+    SEND_EMAIL_BACKOFF_RETRY_VALUE: NonNegativeInt = 5
+    SEND_EMAIL_BACKOFF_GROWTH_BASE_VALUE: NonNegativeInt = 2
 
     # Mailpit
     MAILPIT_URI: str | None = None

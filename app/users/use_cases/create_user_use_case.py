@@ -1,8 +1,9 @@
+from fastapi import status
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
-from fastapi import status
 
 from app.auth.utils import security
+from app.emails.services.emails_service import EmailService
 from app.users.schemas.user_schema import (
     CreateUserRequest,
     UserCreate,
@@ -16,8 +17,6 @@ class CreateUserUseCase:
         self.session = session
 
     def execute(self, create_user_request: CreateUserRequest) -> UserResponse:
-        from app.celery.tasks.emails import send_welcome_email
-
         users_service = UsersService(self.session)
         if users_service.get_by_email(create_user_request.email):
             raise HTTPException(
@@ -34,7 +33,7 @@ class CreateUserUseCase:
             )
         )
 
-        send_welcome_email.delay(created_user.id)  # type: ignore
+        EmailService().send_new_user_email(created_user)
 
         return UserResponse(
             id=created_user.id,
