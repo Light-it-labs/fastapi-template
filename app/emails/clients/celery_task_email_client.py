@@ -1,5 +1,6 @@
 from app.emails.clients.base import BaseEmailClient
-from app.emails.schema.email import Email, EmailContext
+from app.emails.constants.email_client import DEFAULT_ERROR_MSG
+from app.emails.schema.email import Email
 
 
 class CeleryTaskEmailClient(BaseEmailClient):
@@ -9,13 +10,16 @@ class CeleryTaskEmailClient(BaseEmailClient):
 
         self.task = send_email
 
-    def send_email(self, /, email: Email) -> None:
-        if not email.context:
-            email.context = EmailContext()
-
+    def send_email(
+        self,
+        email: Email,
+        /,
+        error_message: str | None = None,
+    ) -> None:
         serialized_email = email.model_dump(
             mode="json",
             exclude_unset=True,
         )
 
-        self.task.delay(serialized_email)
+        error_message = error_message or DEFAULT_ERROR_MSG
+        self.task.delay(serialized_email, error_message)

@@ -3,16 +3,15 @@ import secrets
 from functools import lru_cache
 from typing import Any, Final, List, Literal, Optional, Union
 
-from pydantic import (
-    AnyHttpUrl,
-    PostgresDsn,
-    NonNegativeInt,
-    EmailStr,
-    field_validator,
-    model_validator,
-)
+from pydantic import AnyHttpUrl
+from pydantic import EmailStr
+from pydantic import NonNegativeInt
+from pydantic import PostgresDsn
+from pydantic import field_validator
+from pydantic import model_validator
 from pydantic_core.core_schema import ValidationInfo
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -58,11 +57,8 @@ class Settings(BaseSettings):
     # Email - general
     SENDER_EMAIL: EmailStr = "test@test.com"
     SEND_EMAIL_MAX_RETRIES: NonNegativeInt = 5
-    SEND_EMAIL_RETRY_BACKOFF_VALUE: NonNegativeInt = 5
-
-    # Email - specific
-    SEND_WELCOME_EMAIL_MAX_RETRIES: NonNegativeInt = 5
-    SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE: NonNegativeInt = 5
+    SEND_EMAIL_BACKOFF_RETRY_VALUE: NonNegativeInt = 5
+    SEND_EMAIL_BACKOFF_GROWTH_BASE_VALUE: NonNegativeInt = 2
 
     # Mailpit
     MAILPIT_URI: str | None = None

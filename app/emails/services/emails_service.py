@@ -1,11 +1,10 @@
 from enum import Enum
 from string import Template
 
-from app.core.config import settings
-from app.users.schemas.user_schema import UserInDB
-from app.emails.clients.base import BaseEmailClient
-from app.emails.schema.email import Email, EmailContext
 from app.emails._global_state import get_client
+from app.emails.clients.base import BaseEmailClient
+from app.emails.schema.email import Email
+from app.users.schemas.user_schema import UserInDB
 
 
 class Paths(Enum):
@@ -45,13 +44,8 @@ class EmailService:
             "Welcome",
         )
 
-        email.context = EmailContext(
-            max_retries=settings.SEND_WELCOME_EMAIL_MAX_RETRIES,
-            backoff_in_seconds=settings.SEND_WELCOME_EMAIL_RETRY_BACKOFF_VALUE,
-            error_message=f"Sending new user email to user {user.id} failed",
-        )
-
-        self.email_client.send_email(email)
+        error_message = f"Sending new user email to user {user.id} failed"
+        self.email_client.send_email(email, error_message)
 
     def send_user_remind_email(
         self,
