@@ -1,23 +1,27 @@
 import time
+import typing as t
 from typing import Any
 from urllib.parse import urlparse
 
+import structlog
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
 from celery import Celery
-from fastapi import FastAPI, Request, Response, status
+from fastapi import FastAPI
+from fastapi import Request
+from fastapi import Response
+from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
-import structlog
 from uvicorn.protocols.utils import get_path_with_query_string
 
+from app.celery.celery_settings import get_celery_settings
 
 # NOTE: Unconventional import order is needed to control boot up flow
 # region Configuration
 from app.core.config import settings
-from app.celery.celery_settings import get_celery_settings
 
 celery_settings = get_celery_settings()
 
@@ -43,12 +47,20 @@ celery.config_from_object(celery_settings)
 
 from app import emails
 
-if settings.PROCESS_TYPE == "api":
-    email_client = emails.CeleryTaskEmailClient()
-elif settings.RUN_ENV == "local":
-    email_client = emails.MailpitEmailClient()
-else:
-    email_client = emails.ExampleEmailClient()
+
+class _EmailContext(t.NamedTuple):
+    process_type: t.Literal["api", "worker", "beat"]
+    environment: t.Literal["local", "develop", "staging", "production"]
+
+
+match _EmailContext(settings.PROCESS_TYPE, settings.RUN_ENV):
+    case ("api", _):
+        email_client = emails.CeleryTaskEmailClient()
+    case (_, "local"):
+        email_client = emails.MailpitEmailClient()
+    case _:
+        email_client = emails.ExampleEmailClient()
+
 emails.set_client(email_client)
 
 
@@ -143,16 +155,17 @@ async def validation_exception_handler(
     )
 
 
+from app.auth.api.routers import api_router as auth_router
+from app.common.api.routers import api_router as common_router
+from app.two_factor_authentication.api.router import (
+    api_router as two_factor_authentication_router,
+)
+
 # region Routers
 # NOTE: its important to import routers last as this action
 #       triggers import of the use case layer all the way down
 #       to the model definitions.
 from app.users.api.routers import api_router as users_router
-from app.two_factor_authentication.api.router import (
-    api_router as two_factor_authentication_router,
-)
-from app.auth.api.routers import api_router as auth_router
-from app.common.api.routers import api_router as common_router
 
 app.include_router(users_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
