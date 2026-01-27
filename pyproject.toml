@@ -43,7 +43,7 @@ dev = [
 ]
 
 [tool.mypy]
-python_version="3.12"
+python_version="3.13"
 disallow_untyped_defs = true
 warn_unused_configs = true
 ignore_missing_imports = true
