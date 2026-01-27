@@ -5,12 +5,12 @@ from celery import Task
 from app.common.exceptions import ExternalProviderException
 from app.common.schemas.pagination_schema import ListFilter
 from app.db.session import SessionLocal
-from app.emails import Email, EmailService, get_client
+from app.emails import Email
+from app.emails import EmailService
+from app.emails import get_client
 from app.main import celery
-
 from app.users.schemas.user_schema import UserInDB
 from app.users.services.users_service import UsersService
-
 
 BACKOFF_EXPONENTIAL_GROWTH_BASE: Final[int] = 2
 
@@ -36,8 +36,8 @@ def send_email(self: Task, serialized_email: dict) -> None:
         if not email.context:
             raise
 
-        multiplicator = BACKOFF_EXPONENTIAL_GROWTH_BASE**self.request.retries
-        countdown_in_seconds = email.context.backoff_in_seconds * multiplicator
+        multiplier = BACKOFF_EXPONENTIAL_GROWTH_BASE**self.request.retries
+        countdown_in_seconds = email.context.backoff_in_seconds * multiplier
 
         raise self.retry(
             exc=exc,

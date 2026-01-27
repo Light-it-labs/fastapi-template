@@ -1,4 +1,4 @@
-# FastAPI Tempalte
+# FastAPI Template
 
 Auth Service in FastAPI
 
