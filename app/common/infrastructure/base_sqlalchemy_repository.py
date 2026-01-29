@@ -15,6 +15,7 @@ from app.common.domain import Repository
 from app.common.exceptions import repository_errors
 
 from .base_sqlalchemy_model import BaseSQLAlchemyModel
+from .sqlalchemy_criteria_translator import SqlalchemyCriteriaTranslator
 
 
 class BaseSQLAlchemyRepository[
@@ -102,19 +103,38 @@ class BaseSQLAlchemyRepository[
     def all(self) -> list[TEntity]:
         stmt = sa.select(self.model)
         models = self._session.scalars(stmt)
-        return self._create_entity_from_models(models)
+
+        return self._create_entities_from_models(models)
 
     def where(self, *criteria: Criteria[TEntity]) -> list[TEntity]:
-        raise NotImplementedError()
+        stmt = sa.select(self.model)
+        stmt = self._apply_criteria(stmt, criteria)
+        models = self._session.scalars(stmt)
+
+        return self._create_entities_from_models(models)
 
     def first(self, *criteria: Criteria[TEntity]) -> TEntity | None:
-        raise NotImplementedError()
+        stmt = sa.select(self.model).limit(1)
+        stmt = self._apply_criteria(stmt, criteria)
+        model = self._session.execute(stmt).scalar_one_or_none()
+        if model is None:
+            return None
+
+        return self._create_entity_from_model(model)
 
     def count(self, *criteria: Criteria[TEntity]) -> int:
-        raise NotImplementedError()
+        stmt = sa.select(self.model)
+        stmt = self._apply_criteria(stmt, criteria)
+        count_stmt = sa.select(sa.func.count()).select_from(stmt.subquery())
+
+        return self._session.execute(count_stmt).scalar_one()
 
     def exists(self, *criteria: Criteria[TEntity]) -> bool:
-        raise NotImplementedError()
+        stmt = sa.select(self.model)
+        stmt = self._apply_criteria(stmt, criteria)
+        exists_stmt = sa.select(sa.exists(stmt.subquery()))
+
+        return self._session.execute(exists_stmt).scalar_one()
 
     # Bulk operations
     def insert_many(self, dtos: list[TCreate]) -> list[TEntity]:
@@ -128,7 +148,7 @@ class BaseSQLAlchemyRepository[
         )
 
         models = self._session.scalars(stmt)
-        entities = self._create_entity_from_models(models)
+        entities = self._create_entities_from_models(models)
 
         if len(entities) != len(dtos):
             self._raise_not_created()
@@ -136,10 +156,20 @@ class BaseSQLAlchemyRepository[
         return entities
 
     def update_where(self, dto: TUpdate, *criteria: Criteria[TEntity]) -> int:
-        raise NotImplementedError()
+        stmt = sa.update(self.model).values(
+            **dto.model_dump(exclude_unset=True)
+        )
+        stmt = self._apply_criteria(stmt, criteria)
+
+        result = self._session.execute(stmt)
+        return self._get_row_count(result)
 
     def delete_where(self, *criteria: Criteria[TEntity]) -> int:
-        raise NotImplementedError()
+        stmt = sa.delete(self.model)
+        stmt = self._apply_criteria(stmt, criteria)
+
+        result = self._session.execute(stmt)
+        return self._get_row_count(result)
 
     # ------- Private Helpers --------
     def _create_entity_from_model(self, model: TModel) -> TEntity:
@@ -151,7 +181,7 @@ class BaseSQLAlchemyRepository[
             msg = f"Couldn't create entity instance.\n{e}"
             raise repository_errors.RepositoryError(msg)
 
-    def _create_entity_from_models(
+    def _create_entities_from_models(
         self, models: t.Iterable[TModel]
     ) -> list[TEntity]:
         # TODO: rework to aggregate errors into an exception group?
@@ -159,6 +189,19 @@ class BaseSQLAlchemyRepository[
 
     def _get_by_id(self, entity_id: TEntityId) -> TModel | None:
         return self._session.get(self.model, entity_id)
+
+    def _apply_criteria[
+        TStatement: (sa.Select[tuple[TModel]], sa.Update, sa.Delete)
+    ](
+        self,
+        statement: TStatement,
+        criteria: tuple[Criteria[TEntity], ...],
+    ) -> TStatement:
+        for c in criteria:
+            translator = SqlalchemyCriteriaTranslator.get_for_criteria(c)
+            statement = translator.translate(statement)
+
+        return statement
 
     def _raise_not_found(self) -> t.NoReturn:
         """Override if a better message is required"""
@@ -175,3 +218,8 @@ class BaseSQLAlchemyRepository[
     def _raise_not_deleted(self) -> t.NoReturn:
         """Override if a better message is required"""
         raise repository_errors.EntityNotDeletedError(self.entity)
+
+    def _get_row_count(self, result: sa.Result) -> int:
+        # NOTE: in runtime, the Result is a CursorResult which has this prop
+        # but the type stubs do not reflect this
+        return t.cast(sa.CursorResult[t.Any], result).rowcount
