@@ -1,13 +1,12 @@
 from uuid import UUID
-from app.emails.exceptions.email_client_exception import EmailClientException
+
 from app.common.schemas.pagination_schema import ListFilter
-from app.emails.services.emails_service import EmailService
-from app.db.session import SessionLocal
-from app.main import celery
-
-
 from app.core.config import get_settings
-from app.users.schemas.user_schema import UserInDB
+from app.db.session import SessionLocal
+from app.emails.exceptions.email_client_exception import EmailClientException
+from app.emails.services.emails_service import EmailService
+from app.main import celery
+from app.users.domain.user_dtos import UserInDB
 from app.users.services.users_service import UsersService
 
 settings = get_settings()

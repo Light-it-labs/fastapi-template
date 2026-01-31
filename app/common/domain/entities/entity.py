@@ -21,7 +21,6 @@ type _EntityDefinitionErrors = t.Sequence[_exc.EntityDefinitionError]
 # TODO: base classes for create/update dtos with subset validation (fix irregular repo interface)
 # TODO: schema registry and automatic model rebuilding (fix circular imports for good)
 # TODO: sentinel for unloaded relationships (fix shape of data problem)
-@t.final
 class Entity(pydantic.BaseModel):
     """
     Base model of the application, representing an object in the db.

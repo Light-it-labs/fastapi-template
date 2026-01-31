@@ -1,10 +1,10 @@
 from enum import Enum
 from string import Template
 
-from app.users.schemas.user_schema import UserInDB
+from app.emails._global_state import get_client
 from app.emails.clients.base import BaseEmailClient
 from app.emails.schema.email import Email
-from app.emails._global_state import get_client
+from app.users.domain import User
 
 
 class Paths(Enum):
@@ -36,7 +36,7 @@ class EmailService:
 
     def send_new_user_email(
         self,
-        user: UserInDB,
+        user: User,
     ) -> None:
         email = self._get_email(
             user.email,
@@ -48,7 +48,7 @@ class EmailService:
 
     def send_user_remind_email(
         self,
-        user: UserInDB,
+        user: User,
     ) -> None:
         email = self._get_email(
             user.email,

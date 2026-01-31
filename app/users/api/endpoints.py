@@ -1,13 +1,14 @@
-from fastapi import APIRouter, status
-
-from app.core.config import get_settings
-from app.users.schemas.user_schema import CreateUserRequest, UserResponse
-from app.users.use_cases.create_user_use_case import CreateUserUseCase
-from app.users.api.dependencies.get_current_user import CurrentUser
-from app.common.api.dependencies.get_session import SessionDependency
-
+from fastapi import APIRouter
+from fastapi import status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+
+from app.common.api.dependencies.get_session import SessionDependency
+from app.core.config import get_settings
+from app.users.api.dependencies.get_current_user import CurrentUser
+from app.users.domain.user_dtos import CreateUserRequest
+from app.users.domain.user_dtos import UserResponse
+from app.users.use_cases.create_user_use_case import CreateUserUseCase
 
 router = APIRouter()
 settings = get_settings()
