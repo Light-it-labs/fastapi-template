@@ -17,8 +17,6 @@ type _DtoConstraintEvaluation = _exc.EntityDefinitionError | None
 type _EntityDefinitionErrors = t.Sequence[_exc.EntityDefinitionError]
 
 
-# TODO: BaseImmutableEntity class (fix enforcing update when irrelevant)
-# TODO: base classes for create/update dtos with subset validation (fix irregular repo interface)
 # TODO: schema registry and automatic model rebuilding (fix circular imports for good)
 # TODO: sentinel for unloaded relationships (fix shape of data problem)
 class Entity(pydantic.BaseModel):
