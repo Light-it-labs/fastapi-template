@@ -1,13 +1,16 @@
 from typing import Generator
-import pytest
-from sqlalchemy import RootTransaction, event
-from fastapi.testclient import TestClient
 
-from app.common.api.dependencies.get_session import get_session
-from app.core.config import get_settings
-from app.db.session import engine, SessionLocal
-from app.main import app
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import RootTransaction
+from sqlalchemy import event
 from sqlalchemy.orm import Session
+
+from app.common.api.dependencies.session_dependency import get_session
+from app.core.config import get_settings
+from app.db.session import SessionLocal
+from app.db.session import engine
+from app.main import app
 
 settings = get_settings()
 TEST_DATABASE_URI = settings.SQLALCHEMY_DATABASE_URI
