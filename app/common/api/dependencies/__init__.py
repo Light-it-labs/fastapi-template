@@ -1,1 +1,1 @@
-from .get_session import *
+from .session_dependency import *
