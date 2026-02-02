@@ -2,7 +2,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 from slowapi import Limiter
 
-from app.common.api.dependencies.get_session import SessionDependency
+from app.common.api.dependencies.session_dependency import SessionDependency
 from app.common.exceptions.model_not_created_exception import (
     ModelNotCreatedException,
 )
