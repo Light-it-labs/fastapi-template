@@ -13,7 +13,7 @@ class CreateUserUseCase:
         self,
         create_user_request: user_domain.CreateUserRequest,
     ) -> user_domain.UserResponse:
-        # from app.celery.tasks.emails import send_welcome_email
+        from app.celery.tasks.emails import send_welcome_email
 
         if self.user_repository.exists(
             user_domain.UserEmailFilter(create_user_request.email),
@@ -30,7 +30,7 @@ class CreateUserUseCase:
             )
         )
 
-        # send_welcome_email.delay(created_user.id)  # type: ignore
+        send_welcome_email.delay(created_user.id)
 
         return user_domain.UserResponse(
             id=created_user.id,
