@@ -1,31 +1,31 @@
-from fastapi import APIRouter
-from fastapi import status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+import fastapi
 
-from app.common.api.dependencies.get_session import SessionDependency
-from app.core.config import get_settings
-from app.users.api.dependencies.get_current_user import CurrentUser
-from app.users.domain.user_dtos import CreateUserRequest
-from app.users.domain.user_dtos import UserResponse
-from app.users.use_cases.create_user_use_case import CreateUserUseCase
+from app.common.exceptions import ModelNotCreatedException
+from app.users.api.dependencies import CurrentUserDependency
+from app.users.api.dependencies import UserRepositoryDependency
+from app.users.domain import CreateUserRequest
+from app.users.domain import UserResponse
+from app.users.use_cases import CreateUserUseCase
 
-router = APIRouter()
-settings = get_settings()
-
-limiter = Limiter(key_func=get_remote_address)
+router = fastapi.APIRouter()
 
 
-@router.get("/current", status_code=status.HTTP_200_OK)
-def get_current_user(
-    current_user: CurrentUser,
-) -> UserResponse:
-    return UserResponse.model_validate(current_user)
-
-
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=fastapi.status.HTTP_201_CREATED)
 def create_user(
-    session: SessionDependency,
+    user_repository: UserRepositoryDependency,
     create_user_request: CreateUserRequest,
 ) -> UserResponse:
-    return CreateUserUseCase(session).execute(create_user_request)
+    try:
+        return CreateUserUseCase(user_repository).execute(create_user_request)
+    except ModelNotCreatedException:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_409_CONFLICT,
+            detail="User with that email already registered.",
+        )
+
+
+@router.get("/current", status_code=fastapi.status.HTTP_200_OK)
+def get_current_user(
+    current_user: CurrentUserDependency,
+) -> UserResponse:
+    return UserResponse.model_validate(current_user)

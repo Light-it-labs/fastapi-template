@@ -1,5 +1,4 @@
 __all__ = (
-    "UserEmail",
     "UserEmailField",
     "UserId",
 )

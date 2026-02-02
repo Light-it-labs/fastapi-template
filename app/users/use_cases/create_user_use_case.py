@@ -1,18 +1,13 @@
 __all__ = ("CreateUserUseCase",)
 
-from fastapi import status
-from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
-
 import app.users.domain as user_domain
 from app.auth.utils import security
-from app.users.infrastructure import SQLAlchemyUserRepository
+from app.common.exceptions import ModelNotCreatedException
 
 
 class CreateUserUseCase:
-    # TODO: abstract with dependencies
-    def __init__(self, session: Session):
-        self.repository = SQLAlchemyUserRepository(session)
+    def __init__(self, user_repository: user_domain.UserRepository):
+        self.user_repository = user_repository
 
     def execute(
         self,
@@ -20,15 +15,13 @@ class CreateUserUseCase:
     ) -> user_domain.UserResponse:
         # from app.celery.tasks.emails import send_welcome_email
 
-        if self.repository.exists(
+        if self.user_repository.exists(
             user_domain.UserEmailFilter(create_user_request.email),
         ):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="User with that email already registered.",
-            )
+            msg = "User with that email already registered."
+            raise ModelNotCreatedException(msg)
 
-        created_user = self.repository.create(
+        created_user = self.user_repository.create(
             user_domain.User.CreateDto(
                 email=create_user_request.email,
                 hashed_password=security.get_password_hash(

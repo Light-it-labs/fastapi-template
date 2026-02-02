@@ -1,12 +1,17 @@
-from typing import Annotated, Generator
+__all__ = (
+    "get_session",
+    "SessionDependency",
+)
 
-from fastapi import Depends
+import typing as t
+
+import fastapi
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
 
 
-def get_session() -> Generator:
+def get_session() -> t.Generator[Session, None, None]:
     session = SessionLocal()
     try:
         yield session
@@ -18,4 +23,7 @@ def get_session() -> Generator:
         session.close()
 
 
-SessionDependency = Annotated[Session, Depends(get_session)]
+SessionDependency = t.Annotated[
+    Session,
+    fastapi.Depends(get_session),
+]
