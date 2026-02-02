@@ -9,8 +9,6 @@ __all__ = (
 import re
 import typing as t
 
-from app.common.domain import Entity
-
 from .base_application_error import BaseApplicationError
 
 
@@ -19,7 +17,7 @@ class RepositoryError(BaseApplicationError):
 
 
 class EntityNotFoundError(RepositoryError):
-    def __init__(self, entity: type[Entity] | str):
+    def __init__(self, entity: type | str):
         if isinstance(entity, str):
             entity_name = entity
         else:
@@ -28,7 +26,7 @@ class EntityNotFoundError(RepositoryError):
 
 
 class EntityNotCreatedError(RepositoryError):
-    def __init__(self, entity: type[Entity] | str):
+    def __init__(self, entity: type | str):
         if isinstance(entity, str):
             entity_name = entity
         else:
@@ -37,7 +35,7 @@ class EntityNotCreatedError(RepositoryError):
 
 
 class EntityNotUpdatedError(RepositoryError):
-    def __init__(self, entity: type[Entity] | str):
+    def __init__(self, entity: type | str):
         if isinstance(entity, str):
             entity_name = entity
         else:
@@ -46,7 +44,7 @@ class EntityNotUpdatedError(RepositoryError):
 
 
 class EntityNotDeletedError(RepositoryError):
-    def __init__(self, entity: type[Entity] | str):
+    def __init__(self, entity: type | str):
         if isinstance(entity, str):
             entity_name = entity
         else:

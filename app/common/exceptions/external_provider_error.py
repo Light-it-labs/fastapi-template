@@ -1,4 +1,7 @@
-class ExternalProviderException(Exception):
+__all__ = ("ExternalProviderError",)
+
+
+class ExternalProviderError(Exception):
     def __init__(
         self, message: str = "Connection with external provider failed."
     ):

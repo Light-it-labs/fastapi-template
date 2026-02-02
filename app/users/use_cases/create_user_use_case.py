@@ -2,7 +2,7 @@ __all__ = ("CreateUserUseCase",)
 
 import app.users.domain as user_domain
 from app.auth.utils import security
-from app.common.exceptions import ModelNotCreatedException
+from app.users.errors import UserEmailCollisionError
 
 
 class CreateUserUseCase:
@@ -18,8 +18,7 @@ class CreateUserUseCase:
         if self.user_repository.exists(
             user_domain.UserEmailFilter(create_user_request.email),
         ):
-            msg = "User with that email already registered."
-            raise ModelNotCreatedException(msg)
+            raise UserEmailCollisionError(create_user_request.email)
 
         created_user = self.user_repository.create(
             user_domain.User.CreateDto(

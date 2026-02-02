@@ -1,3 +1,6 @@
+__all__ = ("BaseApplicationError",)
+
+
 class BaseApplicationError(Exception):
     """Base exception for all custom exceptions of the application"""
 

@@ -8,6 +8,8 @@ __all__ = (
 
 import typing as t
 
+from app.common.exceptions import BaseApplicationError
+
 from . import _utils
 
 if t.TYPE_CHECKING:
@@ -15,7 +17,7 @@ if t.TYPE_CHECKING:
     from .entity import _DtoConstraint
 
 
-class EntityDefinitionError(Exception):
+class EntityDefinitionError(BaseApplicationError):
     pass
 
 
