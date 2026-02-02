@@ -1,9 +1,4 @@
-__all__ = (
-    "Criteria", 
-    "Entity", 
-    "Repository",
-)
-
-from .entities import Entity
-from .criteria import Criteria
-from .repository import Repository
+from .entities import *
+from .criteria import *
+from .paginator_criteria import *
+from .repository import *

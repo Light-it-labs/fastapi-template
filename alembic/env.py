@@ -1,17 +1,14 @@
 from __future__ import with_statement
 
+from alembic import context
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.sql.schema import SchemaItem
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from sqlalchemy.sql.schema import SchemaItem
-
-from alembic import context
-from app.common.infrastructure.base_sqlalchemy_model import BaseSQLAlchemyModel
 from app.core.config import get_settings
-from app.users.infrastructure.sqlalchemy_user_model import *  # noqa
-
-# from app.two_factor_authentication.models import *  # noqa
+from app.common.models.base_class import Base
+from app.users.models import *  # noqa
+from app.two_factor_authentication.models import *  # noqa
 
 
 # this is the Alembic Config object, which provides
@@ -26,7 +23,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 
-target_metadata = BaseSQLAlchemyModel.metadata
+target_metadata = Base.metadata
 # target_metadata = None
 
 

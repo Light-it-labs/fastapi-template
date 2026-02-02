@@ -2,8 +2,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.auth.schemas.token_schema import EmailTokenPayload
-from app.auth.utils.security import create_access_token
-from app.auth.utils.security import verify_password
+from app.auth.utils.security import create_access_token, verify_password
+from app.users.models.user import User
 from tests.utils.create_user import create_user
 
 
