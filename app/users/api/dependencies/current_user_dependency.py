@@ -4,6 +4,7 @@ __all__ = (
 )
 
 import typing as t
+import uuid
 
 import fastapi
 
@@ -34,8 +35,9 @@ def get_current_user(
             status_code=fastapi.status.HTTP_401_UNAUTHORIZED, detail=e.message
         )
 
+    user_id = UserId(uuid.UUID(token_data.user_id))
     try:
-        user = user_repository.find_or_fail(UserId(token_data.user_id))
+        user = user_repository.find_or_fail(user_id)
     except ModelNotFoundException as e:
         raise fastapi.HTTPException(
             status_code=404,

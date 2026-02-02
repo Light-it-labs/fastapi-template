@@ -1,4 +1,7 @@
-__all__ = ("SqlalchemyCriteriaTranslator",)
+__all__ = (
+    "SqlalchemyCriteriaTranslator",
+    "Statement",
+)
 
 import abc
 import typing as t
@@ -7,7 +10,7 @@ import sqlalchemy as sa
 
 from app.common.domain import Criteria
 
-type _Statement = sa.Select[t.Any] | sa.Update | sa.Delete
+type Statement = sa.Select[t.Any] | sa.Update | sa.Delete
 type _Criteria = Criteria[t.Any]
 type _Translator = "SqlalchemyCriteriaTranslator[t.Any]"
 type _Registry = dict[type[_Criteria], type[_Translator]]
@@ -38,7 +41,7 @@ class SqlalchemyCriteriaTranslator[TCriteria: _Criteria](abc.ABC):
         return translator_cls(criteria)
 
     @abc.abstractmethod
-    def translate(self, stmt: _Statement) -> _Statement:
+    def translate(self, stmt: Statement) -> Statement:
         raise NotImplementedError()
 
 
