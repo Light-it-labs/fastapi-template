@@ -16,7 +16,7 @@ class CreateUserUseCase:
         from app.celery.tasks.emails import send_welcome_email
 
         if self.user_repository.exists(
-            user_domain.UserEmailFilter(create_user_request.email),
+            user_domain.UserEmailFilterCriteria(create_user_request.email),
         ):
             raise UserEmailCollisionError(create_user_request.email)
 

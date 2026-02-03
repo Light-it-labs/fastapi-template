@@ -1,5 +1,5 @@
 __all__ = (
-    "UserEmailFilter",
+    "UserEmailFilterCriteria",
     "UserCriteria",
 )
 
@@ -15,5 +15,5 @@ class UserCriteria(Criteria[User]):
 
 
 @dataclasses.dataclass(frozen=True)
-class UserEmailFilter(UserCriteria):
+class UserEmailFilterCriteria(UserCriteria):
     email: str
