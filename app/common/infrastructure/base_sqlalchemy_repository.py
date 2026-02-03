@@ -177,7 +177,6 @@ class BaseSQLAlchemyRepository[
         try:
             return self.entity.model_validate(model)
         except pydantic.ValidationError as e:
-            # TODO: raise a better message
             msg = f"Couldn't create entity instance.\n{e}"
             raise repository_errors.RepositoryError(msg)
 
