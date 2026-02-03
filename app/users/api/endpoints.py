@@ -1,30 +1,32 @@
-from fastapi import APIRouter, status
+import fastapi
 
-from app.core.config import get_settings
-from app.users.schemas.user_schema import CreateUserRequest, UserResponse
-from app.users.use_cases.create_user_use_case import CreateUserUseCase
-from app.users.api.dependencies.get_current_user import CurrentUser
-from app.common.api.dependencies.get_session import SessionDependency
+import app.users.domain as user_domain
+import app.users.errors as user_errors
+import app.users.use_cases as use_cases
+from app.users.api.dependencies import CurrentUserDependency
+from app.users.api.dependencies import UserRepositoryDependency
 
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
-router = APIRouter()
-settings = get_settings()
-
-limiter = Limiter(key_func=get_remote_address)
+router = fastapi.APIRouter()
 
 
-@router.get("/current", status_code=status.HTTP_200_OK)
-def get_current_user(
-    current_user: CurrentUser,
-) -> UserResponse:
-    return UserResponse.model_validate(current_user)
-
-
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=fastapi.status.HTTP_201_CREATED)
 def create_user(
-    session: SessionDependency,
-    create_user_request: CreateUserRequest,
-) -> UserResponse:
-    return CreateUserUseCase(session).execute(create_user_request)
+    user_repository: UserRepositoryDependency,
+    create_user_request: user_domain.CreateUserRequest,
+) -> user_domain.UserResponse:
+    use_case = use_cases.CreateUserUseCase(user_repository)
+
+    try:
+        return use_case.execute(create_user_request)
+    except user_errors.UserEmailCollisionError as e:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_409_CONFLICT,
+            detail=e.message,
+        )
+
+
+@router.get("/current", status_code=fastapi.status.HTTP_200_OK)
+def get_current_user(
+    current_user: CurrentUserDependency,
+) -> user_domain.UserResponse:
+    return user_domain.UserResponse.model_validate(current_user)

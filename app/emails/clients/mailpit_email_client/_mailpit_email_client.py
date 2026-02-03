@@ -1,9 +1,8 @@
 from typing import ClassVar
 
-from app.common.exceptions import ExternalProviderException
 from app.common.clients.base_request_client import BaseRequestClient
+from app.common.exceptions import ExternalProviderError
 from app.core.config import settings
-
 from app.emails.clients.base import BaseEmailClient
 from app.emails.schema.email import Email
 
@@ -36,4 +35,4 @@ class MailpitEmailClient(BaseEmailClient, BaseRequestClient):
 
         if not response:
             message = "Email not sent, see logs for details."
-            raise ExternalProviderException(message)
+            raise ExternalProviderError(message)

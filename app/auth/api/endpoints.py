@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Header, status, Response, Request
 
 from app.auth.use_cases.reset_password_use_case import ResetPasswordUseCase
-from app.common.api.dependencies.get_session import SessionDependency
+from app.common.api.dependencies import SessionDependency
 from app.auth.schemas.auth_schema import PasswordResetRequest, UserLogin
 from app.auth.use_cases.auth_user_use_case import AuthUserUseCase
 from app.common.exceptions.model_not_found_exception import (
