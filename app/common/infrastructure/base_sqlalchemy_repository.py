@@ -221,4 +221,14 @@ class BaseSQLAlchemyRepository[
     def _get_row_count(self, result: sa.Result) -> int:
         # NOTE: in runtime, the Result is a CursorResult which has this prop
         # but the type stubs do not reflect this
-        return t.cast(sa.CursorResult[t.Any], result).rowcount
+        match result:
+            case sa.CursorResult(rowcount=row_count):
+                return row_count
+            case _:
+                msg = (
+                    "Can't get result row count: "
+                    f"expected result to be a CursorResult, got {type(result)} instead. "
+                    "This could indicate a breaking change with sqlalchemy, "
+                    "review sqlalchemy repository implementation."
+                )
+                raise repository_errors.RepositoryError(msg)
