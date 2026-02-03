@@ -1,12 +1,12 @@
-from app.common.domain import Paginator
+from app.common.domain import PaginationCriteria
 
 from .sqlalchemy_criteria_translator import SqlalchemyCriteriaTranslator
 from .sqlalchemy_criteria_translator import Statement
 
 
-class SQLAlchemyPaginatorTransaltor(
-    SqlalchemyCriteriaTranslator[Paginator],
-    criteria=Paginator,
+class SQLAlchemyPaginationTranslator(
+    SqlalchemyCriteriaTranslator[PaginationCriteria],
+    criteria=PaginationCriteria,
 ):
     def translate(self, stmt: Statement) -> Statement:
         page_size = self._criteria.page_size

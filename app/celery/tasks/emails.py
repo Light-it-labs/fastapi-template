@@ -1,4 +1,4 @@
-from app.common.domain import Paginator
+from app.common.domain import PaginationCriteria
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.emails.exceptions.email_client_exception import EmailClientException
@@ -14,7 +14,9 @@ def send_reminder_email() -> None:
 
     with SessionLocal() as session:
         user_repository = SQLAlchemyUserRepository(session)
-        users = user_repository.where(Paginator(page=1, page_size=100))
+        users = user_repository.where(
+            PaginationCriteria(page=1, page_size=100)
+        )
         for user in users:
             email_service.send_user_remind_email(user)
 

@@ -1,4 +1,4 @@
-__all__ = ("Paginator",)
+__all__ = ("PaginationCriteria",)
 
 import typing as t
 
@@ -16,6 +16,8 @@ _PageSizeField = t.Annotated[
 ]
 
 
-class Paginator(pydantic.BaseModel, Criteria[t.Any]):
+class PaginationCriteria(pydantic.BaseModel, Criteria[t.Any]):
+    model_config = pydantic.ConfigDict(frozen=True)
+
     page: _PageField = 1
     page_size: _PageSizeField = 10
