@@ -1,35 +1,38 @@
-from sqlalchemy.orm import Session
-
 from fastapi.testclient import TestClient
 
-from tests.utils.create_user import create_user
+from tests.factories import UserFactory
+
 
 login_path = "api/v1/auth/login"
 
 
 class TestLogin:
-    def test_login(self, client: TestClient, session: Session):
-        created_user = create_user(session)
+    def test_login(
+        self, client: TestClient, user_factory: UserFactory
+    ) -> None:
+        user_password = "password"
+
+        user = user_factory.create(password=user_password)
 
         response = client.post(
             login_path,
             json={
-                "email": created_user.email,
-                "password": "password",
+                "email": user.email,
+                "password": user_password,
             },
         )
 
         assert response.status_code == 204
 
     def test_login_incorrect_password(
-        self, client: TestClient, session: Session
-    ):
-        created_user = create_user(session)
+        self, client: TestClient, user_factory: UserFactory
+    ) -> None:
+        user = user_factory.create(password="password")
 
         response = client.post(
             login_path,
             json={
-                "email": created_user.email,
+                "email": user.email,
                 "password": "incorrect_password",
             },
         )
@@ -37,9 +40,9 @@ class TestLogin:
         assert response.status_code == 401
 
     def test_login_non_existent_email(
-        self, client: TestClient, session: Session
-    ):
-        create_user(session)
+        self, client: TestClient, user_factory: UserFactory
+    ) -> None:
+        user_factory.create(email="test@user.com")
 
         response = client.post(
             login_path,
