@@ -1,3 +1,4 @@
+import threading
 import typing as t
 
 import pydantic
@@ -12,6 +13,8 @@ if t.TYPE_CHECKING:
 
 type _BaseSchemaRegistry = list[type["BaseSchema"]]
 
+_Mutex: t.Final = threading.Lock()
+
 
 class BaseSchema(pydantic.BaseModel):
     _rebuilt_models: t.ClassVar[bool] = False
@@ -22,8 +25,22 @@ class BaseSchema(pydantic.BaseModel):
         super().__pydantic_init_subclass__(**kw)
         __class__._registry.append(cls)
 
+    def __new__(cls, *args: t.Any, **kw: t.Any) -> "BaseSchema":
+        if cls is __class__:
+            raise BaseSchemaNotInstantiableError()
+
+        if not cls._rebuilt_models:
+            raise SchemaNotRebuiltError(cls)
+
+        return super().__new__(cls)
+
     @classmethod
     def rebuild_models(cls) -> None:
+        with _Mutex:
+            cls._rebuild_models()
+
+    @classmethod
+    def _rebuild_models(cls) -> None:
         if cls._rebuilt_models:
             return
 
@@ -34,15 +51,6 @@ class BaseSchema(pydantic.BaseModel):
             raise ExceptionGroup(msg, errors)
 
         cls._rebuilt_models = True
-
-    def __new__(cls, *args: t.Any, **kw: t.Any) -> "BaseSchema":
-        if cls is __class__:
-            raise BaseSchemaNotInstantiableError()
-
-        if not cls._rebuilt_models:
-            raise SchemaNotRebuiltError(cls)
-
-        return super().__new__(cls)
 
 
 def _rebuild_and_collect_errors(
