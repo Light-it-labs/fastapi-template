@@ -1,3 +1,5 @@
+__all__ = ("Schema",)
+
 import threading
 import typing as t
 
@@ -11,23 +13,23 @@ if t.TYPE_CHECKING:
     __class__: t.Type
 
 
-type _BaseSchemaRegistry = list[type["BaseSchema"]]
+type _SchemaRegistry = list[type["Schema"]]
 
 _Mutex: t.Final = threading.Lock()
 
 
-class BaseSchema(pydantic.BaseModel):
+class Schema(pydantic.BaseModel):
     _rebuilt_models: t.ClassVar[bool] = False
-    _registry: t.ClassVar[_BaseSchemaRegistry] = []
+    _registry: t.ClassVar[_SchemaRegistry] = []
 
     @classmethod
     def __pydantic_init_subclass__(cls, **kw: t.Any) -> None:
         super().__pydantic_init_subclass__(**kw)
         __class__._registry.append(cls)
 
-    def __new__(cls, *args: t.Any, **kw: t.Any) -> "BaseSchema":
+    def __new__(cls, *args: t.Any, **kw: t.Any) -> "Schema":
         if cls is __class__:
-            raise BaseSchemaNotInstantiableError()
+            raise SchemaNotInstantiableError()
 
         if not cls._rebuilt_models:
             raise SchemaNotRebuiltError(cls)
@@ -54,7 +56,7 @@ class BaseSchema(pydantic.BaseModel):
 
 
 def _rebuild_and_collect_errors(
-    registry: _BaseSchemaRegistry,
+    registry: _SchemaRegistry,
 ) -> list[Exception]:
     results = (_rebuild_schema(schema) for schema in registry)
     errors = (result for result in results if result is not None)
@@ -62,7 +64,7 @@ def _rebuild_and_collect_errors(
     return list(errors)
 
 
-def _rebuild_schema(schema: type[BaseSchema]) -> Exception | None:
+def _rebuild_schema(schema: type[Schema]) -> Exception | None:
     result: Exception | None
     try:
         schema.model_rebuild()
@@ -74,16 +76,19 @@ def _rebuild_schema(schema: type[BaseSchema]) -> Exception | None:
     return result
 
 
-class BaseSchemaNotInstantiableError(Exception):
+class SchemaNotInstantiableError(Exception):
     def __init__(self) -> None:
-        msg = "BaseSchema is a base class. It should not be instantiated"
+        msg = (
+            f"Class `{Schema.__name__}` is a base class. "
+            "It should not be instantiated"
+        )
         super().__init__(msg)
 
 
 class SchemaNotRebuiltError(Exception):
-    def __init__(self, schema: type[BaseSchema]) -> None:
+    def __init__(self, schema: type[Schema]) -> None:
         msg = (
             f"Schema not rebuilt: {schema.__name__}\n"
-            "Must call `BaseSchema.rebuild_models()` before instantiating schemas"
+            f"Must call `{Schema.__name__}.rebuild_models()` before instantiating schemas"
         )
         super().__init__(msg)
