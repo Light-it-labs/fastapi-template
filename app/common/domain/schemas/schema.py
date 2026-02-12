@@ -26,11 +26,11 @@ class Schema(pydantic.BaseModel):
         if cls is __class__:
             raise _exc.SchemaNotInstantiableError(__class__)
 
-        if not _schema_registry.has_rebuilt_schemas():
+        if not _schema_registry.is_rebuilt(cls):
             raise _exc.SchemaNotRebuiltError(__class__, cls)
 
         return super().__new__(cls)
 
-    @classmethod
-    def rebuild_schemas(cls) -> None:
+    @staticmethod
+    def rebuild_all() -> None:
         _schema_registry.rebuild_schemas()

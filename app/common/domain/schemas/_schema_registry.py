@@ -1,22 +1,24 @@
 __all__ = (
     "add_schema",
-    "has_rebuilt_schemas",
+    "is_rebuilt",
     "rebuild_schemas",
 )
 
 import threading
-import typing as t
 
 import pydantic
 
+from . import _exc
+
 # region types
-_Schema = type[pydantic.BaseModel]
-_Registry = list[_Schema]
+type _Schema = type[pydantic.BaseModel]
+type _IsRebuilt = bool
+type _Registry = dict[_Schema, _IsRebuilt]
 
 
 # region public api
 def add_schema(schema: _Schema) -> None:
-    _registry.append(schema)
+    _registry[schema] = False
 
 
 def rebuild_schemas() -> None:
@@ -24,45 +26,28 @@ def rebuild_schemas() -> None:
         _rebuild_schemas()
 
 
-def has_rebuilt_schemas() -> bool:
-    return _has_rebuilt_schemas
+def is_rebuilt(schema: _Schema) -> _IsRebuilt:
+    return _registry[schema]
 
 
 # region private
-_registry: _Registry = []
-_has_rebuilt_schemas: bool = False
-_rebuilding_mutex: t.Final = threading.Lock()
+_registry: _Registry = {}
+_rebuilding_mutex = threading.Lock()
 
 
 def _rebuild_schemas() -> None:
-    global _has_rebuilt_schemas
+    errors: list[Exception] = []
 
-    if _has_rebuilt_schemas:
-        return
+    for schema, is_rebuilt in _registry.items():
+        if is_rebuilt:
+            continue
 
-    errors = _rebuild_and_collect_errors()
+        try:
+            schema.model_rebuild()
+        except Exception as error:
+            errors.append(error)
+        else:
+            _registry[schema] = True
 
     if errors:
-        msg = "Failed to build schemas"
-        raise ExceptionGroup(msg, errors)
-
-    _has_rebuilt_schemas = True
-
-
-def _rebuild_and_collect_errors() -> list[Exception]:
-    results = (_rebuild_schema(schema) for schema in _registry)
-    errors = (result for result in results if result is not None)
-
-    return list(errors)
-
-
-def _rebuild_schema(schema: _Schema) -> Exception | None:
-    result: Exception | None
-    try:
-        schema.model_rebuild()
-    except Exception as error:
-        result = error
-    else:
-        result = None
-
-    return result
+        raise _exc.SchemaRebuildFailedErrors(errors)
