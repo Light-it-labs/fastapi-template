@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     SERVER_NAME: str
     SERVER_HOST: AnyHttpUrl
-    BACKEND_CORS_ORIGINS: Union[str, List[str]] = []
+    BACKEND_CORS_ORIGINS: Union[List[str], str] = []
     PROJECT_NAME: str
     AUTHENTICATION_API_RATE_LIMIT: str = "5 per minute"
     SECURE_COOKIE: bool = True
